@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:playzzo/views/tela_login.dart';
+import 'package:provider/provider.dart';
+import 'models/setup_jogo_impostor_model.dart';
+import 'views/tela_de_setup_jogo_impostor.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    // Provider que disponibiliza o SetupState para toda a aplicação
+    ChangeNotifierProvider<SetupState>(
+      create: (_) => SetupState(),
+      child: const MyApp(),
+    ),
+  );
 }
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -12,7 +20,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Playzzo',
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -36,23 +44,44 @@ class MyApp extends StatelessWidget {
   }
 }
 
+// ---------------------------------------------------
+// Tela que lista os mini‑games disponíveis (após o login)
+// ---------------------------------------------------
+class GameSelectionScreen extends StatelessWidget {
+  const GameSelectionScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Escolha um Jogo')),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          ListTile(
+            leading: const Icon(Icons.theater_comedy),
+            title: const Text('Impostor'),
+            trailing: const Icon(Icons.arrow_forward),
+            onTap: () => Navigator.of(context).pushNamed('/impostor/setup'),
+          ),
+          // OBS*: adicionar outras opções de mini‑games aqui
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------
+// (código de exemplo do contador, mas agora fora da navegação principal)
+// ---------------------------------------------------
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
 
   final String title;
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
+
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
