@@ -30,4 +30,27 @@ class SetupJogoImpostorModel with ChangeNotifier{
     notifyListeners();
   }
 
+  final List<String> Temas = ['Objetos', 'Lugares', 'Profissões'];
+  String _selecionaTema = 'Objetos';
+  String get temaSelecionado => _selecionaTema;
+  void selectTheme(String t) {
+    _selecionaTema = t;
+    notifyListeners();
+  }
+
+  final List<int> OpcaoRound = [3, 5, 7, 10];
+  int _selectedRounds = 5;
+  int get selectedRounds => _selectedRounds;
+  void selectRounds(int r) {
+    _selectedRounds = r;
+    notifyListeners();
+  }
+
+  bool _challengeEnabled = true;
+  bool get challengeEnabled => _challengeEnabled;
+  void toggleChallenge() {
+    _challengeEnabled = !_challengeEnabled;
+    notifyListeners();
+  }
+String Prenda  = 'O perdedor paga a rodada de pizza e a coca lava a louça da festa! 🍕';
 }
