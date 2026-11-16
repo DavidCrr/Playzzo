@@ -1,10 +1,43 @@
 import 'package:flutter/material.dart';
 
-const Color azulColbato = Color(0xFF1A4B9F);
+const Color azulCobalto = Color(0xFF1A4B9F);
 const Color azulCeleste = Color (0xFF72BBE0);
 const Color brancoPuro = Color(0xFFFFFFFF);
 const Color azulMarinho = Color(0xFF0A1B3F);
 const Color rosaCoral = Color(0xFFF07A9A);
+
+class PlayzzoAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final String titleText;
+
+  const PlayzzoAppBar({super.key, required this.titleText});
+
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+      backgroundColor: azulCobalto,
+      elevation: 0,
+      centerTitle: true,
+      title: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.sports_esports, color: brancoPuro, size: 24),
+          const SizedBox(width: 8),
+          Text(
+            titleText,
+            style: const TextStyle(
+              color: brancoPuro,
+              fontWeight: FontWeight.w900,
+              fontSize: 20,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+}
 
 class GameCard extends StatelessWidget{
     final String title;
@@ -28,10 +61,10 @@ class GameCard extends StatelessWidget{
             onTap: onTap,
             child: Container(
                 margin: const EdgeInsets.only(bottom: 16.0),
-                padding const EdgeInsets.all(20.0),
+                padding: const EdgeInsets.all(20.0),
                 decoration: BoxDecoration(
                     color: brancoPuro,
-                    borderRadius: borderRadius.circular(20.0),
+                    borderRadius: BorderRadius.circular(20.0),
                     boxShadow: [
                         BoxShadow(
                             color: azulCeleste.withOpacity(0.2),
@@ -41,19 +74,19 @@ class GameCard extends StatelessWidget{
                     ],
                 ),
                 child: Row(
-                    children:[
+                    children:[ 
                         Container(
                             padding: const EdgeInsets.all(16.0),
                             decoration: BoxDecoration(
-                                color: azulColbato.withOpacity(0.1),
+                                color: azulCobalto.withOpacity(0.1),
                                 shape: BoxShape.circle,
                             ),
-                            child: Icon(icon, size: 32, color: azulColbato),
+                            child: Icon(icon, size: 32, color: azulCobalto),
                         ),
                         const SizedBox(width: 16.0),
                         Expanded(
-                            child:Column{
-                                crossAxisAlignment: crossAxisAlignment.start,
+                            child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                     Row(
                                         children: [
@@ -90,9 +123,9 @@ class GameCard extends StatelessWidget{
                                         ),
                                     ),
                                 ],
-                            },
+                            ),
                         ),
-                        const Icon(Icons.arrow_foward_ios, color: azulCeleste, size: 16),
+                        const Icon(Icons.arrow_forward_ios, color: azulCeleste, size: 16),
                     ],
                 ),
             ),
@@ -107,19 +140,7 @@ class GameSelectionScreen extends StatelessWidget{
     Widget build (BuildContext context) {
         return Scaffold(
             backgroundColor: const Color(0xFFF5F7FA),
-            appBar: AppBar(
-                backgroundColor: Colors.transparent,
-                elevantion: 0,
-                title: const Text(
-                    'Escolha um minigame',
-                    style: TextStyle(
-                        color: azulMarinho,
-                        fontWeight: FontWeight.w900,
-                        fontSize: 22,
-                    ),
-                ),
-                centerTitle: false,
-            ),
+            appBar: const PlayzzoAppBar(titleText: 'Playzzo'),
             body: ListView(
                 padding: const EdgeInsets.all(24.0),
                 children: [
@@ -143,7 +164,7 @@ class GameSelectionScreen extends StatelessWidget{
                     GameCard(
                         title: 'O impostor',
                         description: 'Descubra quem não sabe a palavra secreta da rodada',
-                        icon: Icons.masks.outlined,
+                        icon: Icons.masks_outlined,
                         onTap: (){
                             print("Navegando para Configuração de O Impostor");
                         },
