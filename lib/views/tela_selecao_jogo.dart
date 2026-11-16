@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'tela_config_jogo.dart';
+
 
 const Color azulCobalto = Color(0xFF1A4B9F);
 const Color azulCeleste = Color (0xFF72BBE0);
@@ -44,7 +46,6 @@ class GameCard extends StatelessWidget{
     final String description;
     final IconData icon;
     final VoidCallback onTap;
-    final bool isPopular;
 
     const GameCard({
         Key? key,
@@ -52,7 +53,6 @@ class GameCard extends StatelessWidget{
         required this.description,
         required this.icon,
         required this.onTap,
-        this.isPopular = false,
     }) : super(key: key);
 
     @override
@@ -88,31 +88,13 @@ class GameCard extends StatelessWidget{
                             child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                    Row(
-                                        children: [
-                                            Text(
-                                                title,
-                                                style: const TextStyle(
-                                                    fontSize: 18,
-                                                    fontWeight: FontWeight.w800,
-                                                    color: azulMarinho,
-                                                ),
-                                            ),
-                                            if(isPopular)...[
-                                                const SizedBox(width: 8),
-                                                Container(
-                                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                                    decoration: BoxDecoration(
-                                                        color: rosaCoral,
-                                                        borderRadius: BorderRadius.circular(12),
-                                                    ),
-                                                    child: const Text(
-                                                        'Popular',
-                                                        style: TextStyle(color: brancoPuro, fontSize: 10, fontWeight: FontWeight.bold),
-                                                    ),
-                                                ),
-                                            ]
-                                        ],
+                                    Text(
+                                        title,
+                                        style: const TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w800,
+                                            color: azulMarinho,
+                                        ),
                                     ),
                                     const SizedBox(height: 4.0),
                                     Text(
@@ -148,33 +130,52 @@ class GameSelectionScreen extends StatelessWidget{
                         title: 'Mímica',
                         description: 'Gestos proibidos e risadas garantidas!',
                         icon: Icons.front_hand_rounded,
-                        isPopular: true,
                         onTap: () {
-                            print("Navegando para Configuração de Mímica");
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                builder: (context) => const GameConfigScreen(gameTitle: 'Mímica'),
+                                ),
+                            );
                         },
                     ),
                     GameCard(
                         title: 'Quem Sou Eu?',
                         description: 'Coloque na testa e adivinhe com as dicas da galera!',
                         icon: Icons.face_retouching_natural,
-                        onTap: (){
-                            print("Navegando para Configuração de Quem Sou Eu?");
+                        onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                builder: (context) => const GameConfigScreen(gameTitle: 'Quem Sou Eu?'),
+                                ),
+                            );
                         },
                     ),
                     GameCard(
                         title: 'O impostor',
                         description: 'Descubra quem não sabe a palavra secreta da rodada',
                         icon: Icons.masks_outlined,
-                        onTap: (){
-                            print("Navegando para Configuração de O Impostor");
+                        onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                builder: (context) => const GameConfigScreen(gameTitle: 'O Impostor'),
+                                ),
+                            );
                         },
                     ),
                     GameCard(
                         title: 'Bomba Relógio',
                         description: 'Fale rápido e passe o celular antes da explosão',
                         icon: Icons.timer_outlined,
-                        onTap: (){
-                            print("Navegando para Configuração de Bomba Relógio");
+                         onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                builder: (context) => const GameConfigScreen(gameTitle: 'Bomba Relógio'),
+                                ),
+                            );
                         },
                     ),
                 ],
