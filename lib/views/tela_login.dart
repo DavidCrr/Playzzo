@@ -347,7 +347,7 @@ class _TelaLoginState extends State<TelaLogin> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          'Entrar na Festa',
+                          'Entrar',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -375,7 +375,7 @@ class _TelaLoginState extends State<TelaLogin> {
                         onPressed: () =>
                           _mostrarMensagem('Tela de cadastro em criação.'),
                         child: const Text(
-                          'Cadastra-se',
+                          'Cadastrar-se',
                           style: TextStyle(
                           fontWeight: FontWeight.bold,
                         ),
