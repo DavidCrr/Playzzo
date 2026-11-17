@@ -57,8 +57,7 @@ class _TelaLoginState extends State<TelaLogin> {
         centerTitle: true, //Alinha esse widget todo ao centro
 
         title: const Row(
-          mainAxisSize: MainAxisSize
-              .min, //ocupa o mínimo de espaço e atua junto com o centerTitle
+          mainAxisSize: MainAxisSize.min, //ocupa o mínimo de espaço e atua junto com o centerTitle
 
           children: [
             Icon(
@@ -66,8 +65,7 @@ class _TelaLoginState extends State<TelaLogin> {
               color: Color(0xFF1A4B9F),
               size: 33,
             ),
-            SizedBox(
-                width: 8), //Esse sized box vai delimitar o espaço do ícone
+            SizedBox(width: 8), //Esse sized box vai delimitar o espaço do ícone
             Text('PLAYZZO',
                 style: TextStyle(
                     color: Color(0xFF1A4B9F), //cor padrão
