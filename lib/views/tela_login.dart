@@ -1,5 +1,6 @@
 //Inserindo bibliotecas
 import 'package:flutter/material.dart';
+import 'tela_cadastro.dart';
 
 //Criando a classe TelaLogin
 class TelaLogin extends StatefulWidget {
@@ -27,7 +28,7 @@ class _TelaLoginState extends State<TelaLogin> {
   //Chama o método mostrar mensagem
   //Fazer mais verificações nesse if
     if(email.isEmpty || senha.isEmpty){
-      _mostrarMensagem('Preencha o e-mail e a senha.');
+      _mostrarMensagem('Preencha todos os campos.');
     }
     if(!email.contains('@')){
       _mostrarMensagem('Digite um e-mail válida.');
@@ -372,8 +373,12 @@ class _TelaLoginState extends State<TelaLogin> {
                     ),
                       //Aqui fica o clicável Cadastra-se
                       TextButton(
-                        onPressed: () =>
-                          _mostrarMensagem('Tela de cadastro em criação.'),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder:(context) => const TelaCadastro()),
+                          );
+                        },
                         child: const Text(
                           'Cadastrar-se',
                           style: TextStyle(
