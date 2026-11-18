@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 const Color _azulPrimario = Color(0xFF1A4B9F);
 const Color _azulEscuro = Color(0xFF0A1B3F);
 const Color _cinzaTexto = Color(0xFF434652);
-const Color _fundoCampo = Color(0xFFF0F7FB);
+const Color _fundoCampo = Color.fromARGB(255, 232, 233, 236);
 const Color _rosaDestaque = Color(0xFFE8668A);
 
 
@@ -42,14 +42,29 @@ class _TelaCadastroState extends State<TelaCadastro> {
       SnackBar(content: Text(texto)),
     );
   }
+  Widget _rotulo(String texto) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Text.rich(
+        TextSpan(
+          text: texto,
+          style: const TextStyle(
+            color: _azulEscuro,
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
   //Estilização de todos os campos do formulário
   InputDecoration _decoracaoCampo({
-    required String dica,
     required IconData icone,
+    required String texto,
     Widget? sufixo,
   }) {
     return InputDecoration(
-      hintText: dica,
+      hintText: texto,
       prefixIcon: Icon(icone, color: _azulPrimario),
       suffixIcon: sufixo,
       filled: true,
@@ -89,6 +104,7 @@ class _TelaCadastroState extends State<TelaCadastro> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      //Appbar como icon e nome do sistema
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -120,6 +136,7 @@ class _TelaCadastroState extends State<TelaCadastro> {
           ],
         ),
       ),
+      //Body iniciando com os textos de apresentação e partindo para o formulário
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -144,6 +161,94 @@ class _TelaCadastroState extends State<TelaCadastro> {
                     fontSize: 15,
                     height: 1.5
                   ),
+                ),
+                const SizedBox(height: 20),
+
+                //Iniciando formulário
+                _rotulo('Nome'),
+                TextField(
+                  controller: _nomeController,
+                  decoration: _decoracaoCampo(
+                    texto: 'Marcus...',
+                    icone: Icons.badge_outlined
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                _rotulo('E-mail'),
+                TextField(
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: _decoracaoCampo(
+                    texto:  'seuemail@exemplo.com',
+                    icone: Icons.mail_outline
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                _rotulo('Senha'),
+                TextField(
+                  controller: _senhaController,
+                  obscureText: _senhaOculta,
+                  decoration: _decoracaoCampo(
+                    texto: 'Sua senha',
+                    icone: Icons.lock_outline,
+                    sufixo: IconButton(
+                      icon: Icon(
+                        _senhaOculta ? Icons.visibility_off : Icons.visibility,
+                        color: Colors.grey,
+                      ),
+                      //clicou _senhaOculta que estava true fica diferente de true, portanto false, então a senha fica visível
+                      onPressed:() => 
+                        setState(() => _senhaOculta = !_senhaOculta),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 50),
+
+                SizedBox(
+                  height: 56,
+                  child: ElevatedButton(
+                    onPressed: _criarConta,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _azulPrimario,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Criar Minha Conta',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'Já possui uma conta?',
+                      style: TextStyle(color: _cinzaTexto, fontSize: 14),
+                    ),
+                    TextButton(
+                      onPressed:() => Navigator.pop(context),
+                      child: const Text(
+                        'Fazer login',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
