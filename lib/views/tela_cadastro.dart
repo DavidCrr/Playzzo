@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 const Color _azulPrimario = Color(0xFF1A4B9F);
 const Color _azulEscuro = Color(0xFF0A1B3F);
 const Color _cinzaTexto = Color(0xFF434652);
+const Color _cinzaIcone = Color(0xFF737783);
 const Color _fundoCampo = Color.fromARGB(255, 232, 233, 236);
 const Color _rosaDestaque = Color(0xFFE8668A);
 
@@ -65,7 +66,7 @@ class _TelaCadastroState extends State<TelaCadastro> {
   }) {
     return InputDecoration(
       hintText: texto,
-      prefixIcon: Icon(icone, color: _azulPrimario),
+      prefixIcon: Icon(icone, color: _cinzaIcone),
       suffixIcon: sufixo,
       filled: true,
       fillColor: _fundoCampo,
@@ -170,7 +171,7 @@ class _TelaCadastroState extends State<TelaCadastro> {
                   controller: _nomeController,
                   decoration: _decoracaoCampo(
                     texto: 'Marcus...',
-                    icone: Icons.badge_outlined
+                    icone: Icons.badge_outlined,
                   ),
                 ),
                 const SizedBox(height: 16),

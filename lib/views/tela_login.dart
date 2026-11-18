@@ -1,7 +1,7 @@
 //Inserindo bibliotecas
 import 'package:flutter/material.dart';
 import 'tela_cadastro.dart';
-
+import 'tela_perfil.dart';
 //Criando a classe TelaLogin
 class TelaLogin extends StatefulWidget {
   const TelaLogin({super.key});
@@ -29,11 +29,18 @@ class _TelaLoginState extends State<TelaLogin> {
   //Fazer mais verificações nesse if
     if(email.isEmpty || senha.isEmpty){
       _mostrarMensagem('Preencha todos os campos.');
+      return;
     }
     if(!email.contains('@')){
       _mostrarMensagem('Digite um e-mail válida.');
+      return;
     }
     _mostrarMensagem('Login realizado! Bem-vindo à festa');
+     Navigator.push(
+      context,
+     MaterialPageRoute(builder:(context) => const TelaPerfil()
+      ),
+    );
   }
   
   //Controlador do campo de e-mail e senha 
@@ -198,7 +205,7 @@ class _TelaLoginState extends State<TelaLogin> {
                         onPressed: () =>
                         _mostrarMensagem('Tela de recuperação de senha será criada'),
                         child: const Text(
-                          'Esquece a senha',
+                          'Esqueci a senha',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                         ),
@@ -275,7 +282,7 @@ class _TelaLoginState extends State<TelaLogin> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Text(
-                      'Ainda não tem um conta?',
+                      'Ainda não tem uma conta?',
                       style: TextStyle(
                         color: Color(0xFF434652),
                         fontSize:14,
