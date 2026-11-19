@@ -22,6 +22,7 @@ class _TelaPerfilState extends State<TelaPerfil> {
   void dispose() {
     _nomeController.dispose();
     _emailController.dispose();
+    super.dispose();
   }
     void _mostrarMensagem(String texto) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -58,6 +59,10 @@ class _TelaPerfilState extends State<TelaPerfil> {
       ),
     );
   }
+  void _AtualizarPerfil(){
+    final nome = _nomeController.text.trim();
+    final email = _emailController.text.trim();
+  }
   void _salvar() {
     if (_nomeController.text.trim().isEmpty || _emailController.text.trim().isEmpty) {
       _mostrarMensagem('Os campos não podem ficar vazios.');
@@ -66,6 +71,7 @@ class _TelaPerfilState extends State<TelaPerfil> {
     setState(() {});
       _mostrarMensagem('Alterações salvas!');
   }
+  
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +88,7 @@ class _TelaPerfilState extends State<TelaPerfil> {
             color: _azulPrimario,
             size: 33,
             ),
-            SizedBox(height: 8),
+            SizedBox(width: 8),
             Text(
               'PLAYZZO',
               style: TextStyle(
@@ -100,6 +106,47 @@ class _TelaPerfilState extends State<TelaPerfil> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                const SizedBox(height: 20),
+                Container (
+                child: Column(
+                  children: [
+                    Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        const CircleAvatar(
+                          radius: 46,
+                          backgroundColor: _azulEscuro,
+                          child: Icon(Icons.person,
+                          color: Colors.white,
+                          size: 48,
+                          ),
+                        ),
+                        Positioned(
+                          bottom: 0,
+                          right: -4,
+                          child: GestureDetector(
+                            onTap: () => _mostrarMensagem('teste'),
+                            child: Container(
+                              width: 30,
+                              height: 30,
+                              decoration: BoxDecoration(
+                                color: _azulPrimario,
+                                shape: BoxShape.circle,
+                                border:
+                                  Border.all(color: Colors.white, width: 3),
+                              ),
+                              child: const Icon(Icons.edit,
+                                color: Colors.white,
+                                size: 14,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
                 const SizedBox(height: 8),
                 _rotulo('Nome'),
                 TextField(
@@ -115,6 +162,32 @@ class _TelaPerfilState extends State<TelaPerfil> {
                   keyboardType: TextInputType.emailAddress,
                   decoration: _decoracaoCampo(
                     icone: Icons.mail_outline
+                  ),
+                ),
+                const SizedBox(height: 50),
+                SizedBox(
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: _AtualizarPerfil,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _azulPrimario,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Atualizar perfil',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
