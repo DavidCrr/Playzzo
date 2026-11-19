@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dados_usuario.dart';
 import 'tela_alterar_senha.dart';
+import 'tela_game_quem_sou_eu.dart';
 
 const Color _azulPrimario = Color(0xFF1A4B9F);
 const Color _azulEscuro = Color(0xFF0A1B3F);
@@ -239,6 +240,15 @@ class _TelaPerfilState extends State<TelaPerfil> {
                       ],
                     ),
                   ),
+                ),
+                const SizedBox(height: 12),
+                OutlinedButton(
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const TelaQuemSouEu()),
+                  ),
+                  child: const Text('Testar: Quem Sou Eu'),
                 ),
               ],
             ),
