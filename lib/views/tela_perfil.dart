@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dados_usuario.dart';
+import 'tela_alterar_senha.dart';
 
 const Color _azulPrimario = Color(0xFF1A4B9F);
 const Color _azulEscuro = Color(0xFF0A1B3F);
@@ -15,8 +17,8 @@ class TelaPerfil extends StatefulWidget {
 }
 
 class _TelaPerfilState extends State<TelaPerfil> {
-  final _nomeController = TextEditingController(text: 'Nome de teste');
-  final _emailController = TextEditingController(text: 'emailteste@gmail.com');
+  final _nomeController = TextEditingController(text: DadosUsuario.nome);
+  final _emailController = TextEditingController(text: DadosUsuario.email);
 
   @override
   void dispose() {
@@ -59,17 +61,22 @@ class _TelaPerfilState extends State<TelaPerfil> {
       ),
     );
   }
-  void _AtualizarPerfil(){
+  void _salvar() {
     final nome = _nomeController.text.trim();
     final email = _emailController.text.trim();
-  }
-  void _salvar() {
-    if (_nomeController.text.trim().isEmpty || _emailController.text.trim().isEmpty) {
+
+    if (nome.isEmpty || email.isEmpty) {
       _mostrarMensagem('Os campos não podem ficar vazios.');
       return;
     }
-    setState(() {});
-      _mostrarMensagem('Alterações salvas!');
+    if (!email.contains('@')) {
+      _mostrarMensagem('Digite um e-mail válido.');
+      return;
+    }
+
+    DadosUsuario.nome = nome;
+    DadosUsuario.email = email;
+    _mostrarMensagem('Alterações salvas!');
   }
   
 
@@ -164,11 +171,54 @@ class _TelaPerfilState extends State<TelaPerfil> {
                     icone: Icons.mail_outline
                   ),
                 ),
+                const SizedBox(height: 16),
+                GestureDetector (
+                  onTap: () {
+                    Navigator.push(
+                    context, 
+                    MaterialPageRoute(
+                      builder:(context) =>
+                        const TelaAlterarSenha(esqueceuSenha: false),
+                      ),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: _fundoCampo,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 20,
+                          backgroundColor: Colors.white,
+                          child: Icon(Icons.password,
+                          color: _azulPrimario,
+                          size: 20,
+                            ),
+                          ),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'Alterar senha',
+                              style: TextStyle(
+                                color: _azulEscuro,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        Icon(Icons.chevron_right, color: _azulEscuro),
+                      ],
+                    ),
+                  ),   
+                ),                
                 const SizedBox(height: 50),
                 SizedBox(
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: _AtualizarPerfil,
+                  onPressed: _salvar,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _azulPrimario,
                     foregroundColor: Colors.white,

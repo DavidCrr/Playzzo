@@ -2,6 +2,9 @@
 import 'package:flutter/material.dart';
 import 'tela_cadastro.dart';
 import 'tela_perfil.dart';
+import 'dados_usuario.dart';
+import 'tela_alterar_senha.dart';
+
 //Criando a classe TelaLogin
 class TelaLogin extends StatefulWidget {
   const TelaLogin({super.key});
@@ -33,6 +36,11 @@ class _TelaLoginState extends State<TelaLogin> {
     }
     if(!email.contains('@')){
       _mostrarMensagem('Digite um e-mail válida.');
+      return;
+    }
+    //dados de teste
+    if (email != DadosUsuario.email || senha != DadosUsuario.senha) {
+      _mostrarMensagem('E-mail ou senha incorretos.');
       return;
     }
     _mostrarMensagem('Login realizado! Bem-vindo à festa');
@@ -202,8 +210,14 @@ class _TelaLoginState extends State<TelaLogin> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       TextButton(
-                        onPressed: () =>
-                        _mostrarMensagem('Tela de recuperação de senha será criada'),
+                        onPressed: () {
+                          Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:(context) => const TelaAlterarSenha(esqueceuSenha: true),
+                            ),
+                          );
+                        },
                         child: const Text(
                           'Esqueci a senha',
                           style: TextStyle(
