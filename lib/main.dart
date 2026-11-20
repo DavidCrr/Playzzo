@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:playzzo/views/tela_login.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  //conectando o supabase
+  await Supabase.initialize(
+    url: 'https://uiwwoeuwidbizktkpaxm.supabase.co' ,
+    anonKey:'sb_publishable_YmjSf9xR0DuZtn5xdajeTA_yRskVoCI',
+  );
   runApp(const MyApp());
 }
 

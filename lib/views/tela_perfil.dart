@@ -155,6 +155,15 @@ class _TelaPerfilState extends State<TelaPerfil> {
                   ],
                 ),
               ),
+              const SizedBox(height: 12),
+                const Text(
+                  'Dados pessoais',
+                  style: TextStyle(
+                  color: _azulEscuro,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 20
+                  ),
+                ),
                 const SizedBox(height: 8),
                 _rotulo('Nome'),
                 TextField(
@@ -170,6 +179,15 @@ class _TelaPerfilState extends State<TelaPerfil> {
                   keyboardType: TextInputType.emailAddress,
                   decoration: _decoracaoCampo(
                     icone: Icons.mail_outline
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Dados de segurança',
+                  style: TextStyle(
+                  color: _azulEscuro,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 20
                   ),
                 ),
                 const SizedBox(height: 16),
