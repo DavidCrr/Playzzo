@@ -1,4 +1,4 @@
-import 'dart:typed_data';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:playzzo/models/usuario.dart';
 
@@ -59,7 +59,7 @@ class AuthService {
     return usuarioAtual!;
   }
   //login
-  static Future<void> login(String email, String senha) async {
+  static Future<Usuario> login(String email, String senha) async {
     try {
       await _supabase.auth.signInWithPassword(
         email: email,
@@ -97,7 +97,7 @@ class AuthService {
     }
   }
   //alteração de senha
-  static Future<void> alterarSenha(String senhaAtual, novaSenha) async {
+  static Future<void> alterarSenha(String senhaAtual, String novaSenha) async {
     try{
       await _supabase.auth.signInWithPassword(
         email: usuarioAtual!.email,
@@ -119,5 +119,7 @@ class AuthService {
     await _supabase.auth.signOut();
     usuarioAtual = null;
   }
-  
+  static Future<void> redefinirSenha(String email, String novaSenha) async {
+    throw ErroApi('Recuperação de senha será feita na próxima etapa.');
+  }
 }

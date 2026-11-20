@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:playzzo/services/auth_service.dart';7
+import 'package:playzzo/services/auth_service.dart';
 
 const Color _azulPrimario = Color(0xFF1A4B9F);
 const Color _azulEscuro = Color(0xFF0A1B3F);
@@ -86,26 +86,13 @@ class _TelaAlterarSenhaState extends State<TelaAlterarSenha> {
     );
   }
 
-  void _alterarSenha() {
+  Future<void> _alterarSenha() async{
     final novaSenha = _novaSenhaController.text;
     final confirmar = _confirmarController.text;
-
-    // 1ª verificação: muda conforme a tela de onde o usuário veio
-    if (widget.esqueceuSenha) {
-      if (_emailController.text.trim() != DadosUsuario.email) {
-        _mostrarMensagem('E-mail não encontrado.');
-        return;
-      }
-    } else {
-      if (_senhaAtualController.text != DadosUsuario.senha) {
-        _mostrarMensagem('Senha atual incorreta.');
-        return;
-      }
-    }
-
+  
     // Verificações iguais para os dois casos
-    if (novaSenha.length < 6) {
-      _mostrarMensagem('A nova senha precisa ter no mínimo 6 caracteres.');
+    if (novaSenha.length < 8) {
+      _mostrarMensagem('A nova senha precisa ter no mínimo 8 caracteres.');
       return;
     }
     if (novaSenha != confirmar) {
@@ -113,10 +100,25 @@ class _TelaAlterarSenhaState extends State<TelaAlterarSenha> {
       return;
     }
 
-    // Tudo certo: grava a nova senha e volta para a tela anterior
-    DadosUsuario.senha = novaSenha;
+    setState(() => _carregando = true);
+    try{
+      if(widget.esqueceuSenha) {
+        await AuthService.redefinirSenha(
+          _emailController.text.trim(), novaSenha
+        );
+      } else {
+        await AuthService.alterarSenha(
+          _senhaAtualController.text, novaSenha
+        );
+      }
     _mostrarMensagem('Senha alterada com sucesso!');
-    Navigator.pop(context);
+    if (mounted) Navigator.pop(context);
+    }
+    on ErroApi catch (erro) {
+      _mostrarMensagem(erro.mensagem);
+    } finally {
+      if (mounted) setState(() => _carregando = false);
+    }
   }
 
   @override
@@ -214,6 +216,7 @@ class _TelaAlterarSenhaState extends State<TelaAlterarSenha> {
                   decoration: _decoracaoCampo(
                     dica: 'Repita a nova senha',
                     icone: Icons.check_circle_outline,
+                    sufixo: _botaoOlho(),
                   ),
                 ),
 
@@ -222,15 +225,25 @@ class _TelaAlterarSenhaState extends State<TelaAlterarSenha> {
                 SizedBox(
                   height: 56,
                   child: ElevatedButton(
-                    onPressed: _alterarSenha,
+                    onPressed: _carregando ? null : _alterarSenha,
                     style: ElevatedButton.styleFrom(
+                      disabledBackgroundColor: _azulPrimario,
                       backgroundColor: _azulPrimario,
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text(
+                      child: _carregando
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2.5,
+                            ),
+                          )
+                    : const Text(
                       'Salvar nova senha',
                       style: TextStyle(
                         fontSize: 16,

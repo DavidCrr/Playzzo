@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:playzzo/services/auth_service.dart';
 
 //Já definindo as váriaveis das cores para poder reaproveitar, ver de fazer isso nas outras telas.
 const Color _azulPrimario = Color(0xFF1A4B9F);
@@ -23,22 +24,25 @@ class _TelaCadastroState extends State<TelaCadastro> {
   final _nomeController = TextEditingController();
   final _emailController = TextEditingController();
   final _senhaController = TextEditingController();
+  final _confirmarController = TextEditingController();
 
   //Estado inicial tela
   bool _senhaOculta = true;
   bool _confirmarOculta = true;
-  bool _aceitouTermos = false;
+  bool _carregando = false;
 
   @override
   void dispose() {
     _nomeController.dispose();
     _emailController.dispose();
     _senhaController.dispose();
+    _confirmarController.dispose();
     super.dispose();
   }
   //métodos
   //mostrar mensagem na parte inferior da tela snackbar
   void _mostrarMensagem(String texto) {
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(texto)),
     );
@@ -76,12 +80,13 @@ class _TelaCadastroState extends State<TelaCadastro> {
       ),
     );
   }
-  void _criarConta() {
+  Future<void> _criarConta() async{
     final nome = _nomeController.text.trim();
     final email = _emailController.text.trim();
     final senha = _senhaController.text;
+    final confirmar = _confirmarController.text;
 
-    if(nome.isEmpty || email.isEmpty || senha.isEmpty){
+    if(nome.isEmpty || email.isEmpty || senha.isEmpty || confirmar.isEmpty){
       _mostrarMensagem('Preencha todos os campos.');
       return;
     }
@@ -89,17 +94,26 @@ class _TelaCadastroState extends State<TelaCadastro> {
       _mostrarMensagem('Digite um e-mail válido');
       return;
     }
+    if (senha != confirmar) {
+      _mostrarMensagem('AS senhas não coincidem');
+      return;
+    }
     if(senha.length < 8){
       _mostrarMensagem('A senha precisa ter no mínimo 8 caracteres.');
       return;
     }
-    if (!_aceitouTermos){
-      _mostrarMensagem('Você precisa aceitar os Termos de Uso.');
-      return;
-    }
+    setState(() => _carregando = true);
+    try {
+      await AuthService.cadastrar(nome, email, senha);
     //Cadastro deu certo, ele vai voltar para tela de login, conforme última página da pilha
     _mostrarMensagem('Conta criada com sucesso!');
-    Navigator.pop(context);
+    if (mounted) Navigator.pop(context);
+    }
+    on ErroApi catch (erro){
+      _mostrarMensagem(erro.mensagem);
+    } finally {
+      if (mounted) setState(() => _carregando = false);
+    }
   }
 
   @override
@@ -126,7 +140,7 @@ class _TelaCadastroState extends State<TelaCadastro> {
               color: _azulPrimario,
               size: 33
             ),
-            SizedBox(height: 8),
+            SizedBox(width: 8),
             Text(
               'PLAYZZO',
               style: TextStyle(
@@ -205,20 +219,48 @@ class _TelaCadastroState extends State<TelaCadastro> {
                     ),
                   ),
                 ),
+                                const SizedBox(height: 16),
+                _rotulo('Confirmar senha'),
+                TextField(
+                  controller: _confirmarController,
+                  obscureText: _confirmarOculta,
+                  decoration: _decoracaoCampo(
+                    texto: 'Repita sua senha',
+                    icone: Icons.check_circle_outline,
+                    sufixo: IconButton(
+                      icon: Icon(
+                        _confirmarOculta ? Icons.visibility_off : Icons.visibility,
+                        color: Colors.grey,
+                      ),
+                      onPressed: () =>
+                          setState(() => _confirmarOculta = !_confirmarOculta),
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 50),
 
                 SizedBox(
                   height: 56,
                   child: ElevatedButton(
-                    onPressed: _criarConta,
+                    onPressed: _carregando ? null : _criarConta,
                       style: ElevatedButton.styleFrom(
+                        disabledBackgroundColor: _azulPrimario,
                         backgroundColor: _azulPrimario,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Row(
+                      child: _carregando
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2.5,
+                          ),
+                        )
+                    : const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(

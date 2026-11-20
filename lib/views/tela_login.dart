@@ -2,8 +2,10 @@
 import 'package:flutter/material.dart';
 import 'tela_cadastro.dart';
 import 'tela_perfil.dart';
-import 'dados_usuario.dart';
+import 'package:playzzo/services/auth_service.dart';
 import 'tela_alterar_senha.dart';
+
+const Color _azulPrimario = Color(0xFF1A4B9F);
 
 //Criando a classe TelaLogin
 class TelaLogin extends StatefulWidget {
@@ -16,16 +18,18 @@ class TelaLogin extends StatefulWidget {
 class _TelaLoginState extends State<TelaLogin> {
   bool _senhaOculta = true;
   bool _lembrarAparelho = true;
+  bool _carregando = false;
 
   //Mostra a mensagem na parte inferior da tela
   void _mostrarMensagem(String texto){
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(texto)),
     );
   }
 
   //Executa quando clica em "Entrar na Festa"
-  void _entrar() {
+  Future<void> _entrar() async{
     final email = _emailController.text.trim();
     final senha = _senhaController.text;
   //Chama o método mostrar mensagem
@@ -38,17 +42,21 @@ class _TelaLoginState extends State<TelaLogin> {
       _mostrarMensagem('Digite um e-mail válida.');
       return;
     }
-    //dados de teste
-    if (email != DadosUsuario.email || senha != DadosUsuario.senha) {
-      _mostrarMensagem('E-mail ou senha incorretos.');
-      return;
-    }
-    _mostrarMensagem('Login realizado! Bem-vindo à festa');
-     Navigator.push(
+    setState(() => _carregando = true);
+    try {
+      await AuthService.login(email, senha);
+      if (!mounted) return;
+      Navigator.push(
       context,
-     MaterialPageRoute(builder:(context) => const TelaPerfil()
-      ),
-    );
+      MaterialPageRoute(builder:(context) => const TelaPerfil()
+        ),
+      );
+    }
+    on ErroApi catch(erro) {
+      _mostrarMensagem(erro.mensagem);
+    } finally {
+      if (mounted) setState(() => _carregando = false);
+    }
   }
   
   //Controlador do campo de e-mail e senha 
@@ -80,7 +88,7 @@ class _TelaLoginState extends State<TelaLogin> {
               color: Color(0xFF1A4B9F),
               size: 33,
             ),
-            SizedBox(height: 8), //Esse sized box vai delimitar o espaço do ícone
+            SizedBox(width: 8), //Esse sized box vai delimitar o espaço do ícone
             Text('PLAYZZO',
                 style: TextStyle(
                     color: Color(0xFF1A4B9F), //cor padrão
@@ -250,14 +258,6 @@ class _TelaLoginState extends State<TelaLogin> {
                         style: TextStyle(color: Color(0xFF0A1B3F), fontSize: 14),
                       ),
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF2F3FF),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -267,15 +267,25 @@ class _TelaLoginState extends State<TelaLogin> {
                 SizedBox(
                   height: 56,
                   child: ElevatedButton(
-                    onPressed: _entrar,
+                    onPressed: _carregando ? null : _entrar,
                     style: ElevatedButton.styleFrom(
+                      disabledBackgroundColor: _azulPrimario,
                       backgroundColor: const Color(0xFF1A4B9F),
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Row(
+                      child: _carregando
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2.5,
+                          ),
+                        )
+                    : const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:playzzo/services/auth_service.dart';
 import 'tela_alterar_senha.dart';
 import 'tela_game_quem_sou_eu.dart';
-import 'package:playzzo/models/usuario.dart';
 
 const Color _azulPrimario = Color(0xFF1A4B9F);
 const Color _azulEscuro = Color(0xFF0A1B3F);
@@ -19,8 +18,8 @@ class TelaPerfil extends StatefulWidget {
 }
 
 class _TelaPerfilState extends State<TelaPerfil> {
-  final _nomeController = TextEditingController(text: Usuario.nome);
-  final _emailController = TextEditingController(text: .email);
+  final _nomeController = TextEditingController(text: AuthService.usuarioAtual?.nome ?? '');
+  final _emailController = TextEditingController(text: AuthService.usuarioAtual?.email ?? '');
 
   bool _carregando = false;
   @override
@@ -65,22 +64,23 @@ class _TelaPerfilState extends State<TelaPerfil> {
       ),
     );
   }
-  void _salvar() {
+  Future<void> _salvar() async{
     final nome = _nomeController.text.trim();
-    final email = _emailController.text.trim();
 
-    if (nome.isEmpty || email.isEmpty) {
-      _mostrarMensagem('Os campos não podem ficar vazios.');
+    if (nome.isEmpty) {
+      _mostrarMensagem('O nome não podem ficar vazio.');
       return;
     }
-    if (!email.contains('@')) {
-      _mostrarMensagem('Digite um e-mail válido.');
-      return;
-    }
-
-    DadosUsuario.nome = nome;
-    DadosUsuario.email = email;
+    setState(() => _carregando = true);
+    try {
+      await AuthService.atualizarPerfil(nome);
     _mostrarMensagem('Alterações salvas!');
+    }
+    on ErroApi catch (erro) {
+      _mostrarMensagem(erro.mensagem);
+    } finally {
+      if (mounted) setState(() => _carregando = false);
+    }
   }
   
 
@@ -178,13 +178,14 @@ class _TelaPerfilState extends State<TelaPerfil> {
                 const SizedBox(height:16),
                 _rotulo('E-mail'),
                 TextField(
+                  readOnly: true,
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   decoration: _decoracaoCampo(
                     icone: Icons.mail_outline
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
                 const Text(
                   'Dados de segurança',
                   style: TextStyle(
@@ -240,15 +241,25 @@ class _TelaPerfilState extends State<TelaPerfil> {
                 SizedBox(
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: _salvar,
+                  onPressed: _carregando ? null : _salvar,
                   style: ElevatedButton.styleFrom(
+                    disabledBackgroundColor: _azulPrimario,
                     backgroundColor: _azulPrimario,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                child: const Row(
+                child: _carregando
+                ? const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2.5,
+                  ),
+                )
+                : const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
@@ -261,6 +272,14 @@ class _TelaPerfilState extends State<TelaPerfil> {
                       ],
                     ),
                   ),
+                ),
+                const SizedBox(height: 15),
+                TextButton(
+                  onPressed: () async {
+                    await AuthService.logout();
+                    if (context.mounted) Navigator.pop(context);
+                  },
+                  child: const Text('Sair da conta'),
                 ),
                 const SizedBox(height: 12),
                 OutlinedButton(
