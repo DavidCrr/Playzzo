@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dados_usuario.dart';
+import 'package:playzzo/services/auth_service.dart';7
 
 const Color _azulPrimario = Color(0xFF1A4B9F);
 const Color _azulEscuro = Color(0xFF0A1B3F);
@@ -25,6 +25,7 @@ class _TelaAlterarSenhaState extends State<TelaAlterarSenha> {
   final _confirmarController = TextEditingController();
 
   bool _senhasOcultas = true;
+  bool _carregando = false;
 
   @override
   void dispose() {
@@ -36,6 +37,7 @@ class _TelaAlterarSenhaState extends State<TelaAlterarSenha> {
   }
 
   void _mostrarMensagem(String texto) {
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(texto)),
     );

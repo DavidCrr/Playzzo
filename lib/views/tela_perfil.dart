@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'dados_usuario.dart';
+import 'package:playzzo/services/auth_service.dart';
 import 'tela_alterar_senha.dart';
 import 'tela_game_quem_sou_eu.dart';
+import 'package:playzzo/models/usuario.dart';
 
 const Color _azulPrimario = Color(0xFF1A4B9F);
 const Color _azulEscuro = Color(0xFF0A1B3F);
@@ -18,9 +19,10 @@ class TelaPerfil extends StatefulWidget {
 }
 
 class _TelaPerfilState extends State<TelaPerfil> {
-  final _nomeController = TextEditingController(text: DadosUsuario.nome);
-  final _emailController = TextEditingController(text: DadosUsuario.email);
+  final _nomeController = TextEditingController(text: Usuario.nome);
+  final _emailController = TextEditingController(text: .email);
 
+  bool _carregando = false;
   @override
   void dispose() {
     _nomeController.dispose();
@@ -28,6 +30,7 @@ class _TelaPerfilState extends State<TelaPerfil> {
     super.dispose();
   }
     void _mostrarMensagem(String texto) {
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(texto)),
     );

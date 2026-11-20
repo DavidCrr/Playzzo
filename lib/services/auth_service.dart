@@ -38,5 +38,86 @@ class AuthService {
     return ErroApi('Erro de conexão. Verifique a internet e tente novamente.');
   }
 
-  static Future<Us
+  static Future<Usuario> _carregarUsuario() async {
+    final user = _supabase.auth.currentUser!;
+
+    final dados = await _supabase
+    .from('usuario')
+    .select()
+    .eq('id', user.id)
+    .single();
+
+    if (dados['ativo'] == false) {
+      await _supabase.auth.signOut();
+      throw ErroApi('Esta conta está desativada.');
+    }
+    usuarioAtual = Usuario(
+      id: dados['id'],
+      nome: dados['nome'],
+      email: dados['email'],
+    );
+    return usuarioAtual!;
+  }
+  //login
+  static Future<void> login(String email, String senha) async {
+    try {
+      await _supabase.auth.signInWithPassword(
+        email: email,
+        password: senha,
+      );
+      return await _carregarUsuario();
+    }
+    catch (e) {
+      throw _erro(e);
+    }
+  }
+  //cadatro
+  static Future<void> cadastrar(String nome, String email, String senha) async {
+    try {
+      await _supabase.auth.signUp(
+        email: email,
+        password: senha,
+        data: {'nome': nome}, //trigger
+      );
+      await _supabase.auth.signOut(); //signOut para o usuário logar novamente
+    }
+    catch (e) {
+      throw _erro(e);
+    }
+  }
+  //atualizar o nome
+  static Future<void> atualizarPerfil(String nome) async {
+    try {
+      final id = usuarioAtual!.id;
+      await _supabase.from('usuario').update({'nome': nome}).eq('id', id);
+      usuarioAtual = Usuario(id: id, nome: nome, email: usuarioAtual!.email);
+    }
+    catch (e){
+      throw _erro(e);
+    }
+  }
+  //alteração de senha
+  static Future<void> alterarSenha(String senhaAtual, novaSenha) async {
+    try{
+      await _supabase.auth.signInWithPassword(
+        email: usuarioAtual!.email,
+        password: senhaAtual,
+      );
+    }
+    catch (_){
+      throw ErroApi('Senha atual incorreta');
+    }
+    try{
+      await _supabase.auth.updateUser(UserAttributes(password: novaSenha));
+    }
+    catch (e){
+      throw _erro(e);
+    }
+  }
+  //sair
+  static Future<void> logout() async{
+    await _supabase.auth.signOut();
+    usuarioAtual = null;
+  }
+  
 }
