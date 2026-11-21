@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:playzzo/views/tela_login.dart';
 import 'package:provider/provider.dart';
 import 'models/setup_jogo_impostor_model.dart';
-import 'views/tela_de_setup_jogo_impostor.dart';
+import 'views/tela_setup_impostor.dart';
 
 void main() {
   runApp(
@@ -39,7 +39,13 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: .fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const TelaLogin(),
+      initialRoute: '/impostor/setup',
+        routes: {
+          '/login': (context) => const TelaLogin(),
+          '/game': (context) => const GameSelectionScreen(),
+          '/impostor/setup': (context) => const TelaSetupImpostor(),
+          //'/impostor': (context) => tela_jogo_impostor()
+        },
     );
   }
 }
