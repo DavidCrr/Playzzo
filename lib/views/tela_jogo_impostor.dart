@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -41,6 +42,12 @@ class _TelaJogoImpostorState extends State<TelaJogoImpostor> {
   int? _jogadorAcusadoIndex;
   bool _votacaoFinalizada = false;
 
+  // Variáveis do sorteio de quem começa as pistas (Fase 2)
+  int _indiceQuemComeca = 0;
+  bool _sorteioEmAndamento = false;
+  bool _sorteioFinalizado = false;
+  int _indiceAnimacaoSorteio = 0;
+
   // Banco de palavras local por tema (com fallback resiliente até plugar no Supabase)
   final Map<String, List<String>> _bancoPalavras = {
     'Objetos': ['Bicicleta', 'Celular', 'Relógio', 'Câmera', 'Guitarra', 'Óculos', 'Mochila', 'Guarda-chuva'],
@@ -66,12 +73,22 @@ class _TelaJogoImpostorState extends State<TelaJogoImpostor> {
     final palavrasDoTema = _bancoPalavras[setup.temaSelecionado] ?? _bancoPalavras['Objetos']!;
     _palavraSecreta = palavrasDoTema[random.nextInt(palavrasDoTema.length)];
 
+    // 3. Sorteia quem começa as pistas (nunca o impostor)
+    final candidatos = List.generate(listaJogadores.length, (i) => i)
+        .where((i) => i != _indiceImpostor)
+        .toList()
+      ..shuffle(random);
+    _indiceQuemComeca = candidatos.isNotEmpty ? candidatos.first : 0;
+
     setState(() {
       _indiceJogadorAtual = 0;
       _identidadeRevelada = false;
       _faseAtual = FaseJogo.distribuicao;
       _jogadorAcusadoIndex = null;
       _votacaoFinalizada = false;
+      _sorteioEmAndamento = false;
+      _sorteioFinalizado = false;
+      _indiceAnimacaoSorteio = 0;
     });
   }
 
@@ -119,9 +136,9 @@ class _TelaJogoImpostorState extends State<TelaJogoImpostor> {
           destaqueVencedor: !acertaramOImpostor,
         ));
       } else {
-        // Pontuação dos cidadãos
+        // Pontuação dos jogadores
         final pontos = acertaramOImpostor ? 150 : 50;
-        final detalhe = acertaramOImpostor ? 'Cidadão (Venceu)' : 'Cidadão (Enganado)';
+        final detalhe = acertaramOImpostor ? 'Jogador(a) (Venceu)' : 'Jogador(a) (Enganado)';
         rankingFinal.add(JogadorPontuacao(
           nome: p.name,
           pontos: pontos,
@@ -540,7 +557,7 @@ class _TelaJogoImpostorState extends State<TelaJogoImpostor> {
               style: TextStyle(color: Colors.white, fontSize: 13, height: 1.4),
             ),
           ] else ...[
-            // MODO CIDADÃO
+            // MODO JOGADOR(A)
             const Text(
               'SUA PALAVRA SECRETA É:',
               style: TextStyle(
@@ -555,7 +572,7 @@ class _TelaJogoImpostorState extends State<TelaJogoImpostor> {
               _palavraSecreta.toUpperCase(),
               textAlign: TextAlign.center,
               style: const TextStyle(
-                color: Colors.white,
+                color: Color(0xFF5C7A99),
                 fontSize: 34,
                 fontWeight: FontWeight.w900,
                 letterSpacing: 1,
@@ -569,13 +586,13 @@ class _TelaJogoImpostorState extends State<TelaJogoImpostor> {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Text(
-                'Você é Cidadão(ã)',
+                'Você não é o impostor',
                 style: TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.bold),
               ),
             ),
             const SizedBox(height: 10),
             const Text(
-              'Dê pistas sutis na mesa para que outros cidadãos saibam que você sabe, sem entregar a palavra ao impostor.',
+              'Dê pistas sutis na mesa para que outros jogadores saibam que você sabe, sem entregar a palavra ao impostor.',
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.white70, fontSize: 12, height: 1.4),
             ),
@@ -601,71 +618,47 @@ class _TelaJogoImpostorState extends State<TelaJogoImpostor> {
   // FASE 2: DEBATE E PISTAS NA MESA
   // =========================================================================
   Widget _telaDiscussao(SetupState setup, List<Player> listaJogadores) {
-    final anfitriao = listaJogadores.firstWhere((p) => p.isHost, orElse: () => listaJogadores.first);
-
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Info: tema + rodadas
           Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
             decoration: BoxDecoration(
               color: _fundoCampo,
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(16),
               border: Border.all(color: _borda),
             ),
-            child: Column(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                const Icon(Icons.record_voice_over, color: _azulPrimario, size: 48),
-                const SizedBox(height: 12),
-                const Text(
-                  'RODADA DE PISTAS!',
-                  style: TextStyle(
-                    color: _azulEscuro,
-                    fontSize: 22,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'O celular agora fica no meio da mesa.\nO primeiro a dar uma pista é:',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: _cinzaTexto, fontSize: 13),
-                ),
-                const SizedBox(height: 6),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: _azulClaro),
-                  ),
-                  child: Text(
-                    anfitriao.name,
-                    style: const TextStyle(
-                      color: _azulPrimario,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                const Divider(),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _infoBadge('Tema', setup.temaSelecionado),
-                    _infoBadge('Rodadas', '${setup.rodadasSelecionadas} voltas'),
-                  ],
-                ),
+                _infoBadge('Tema', setup.temaSelecionado),
+                _infoBadge('Rodadas', '${setup.rodadasSelecionadas} volta(s)'),
               ],
             ),
           ),
 
-          const SizedBox(height: 18),
+          const SizedBox(height: 20),
 
+          // Área do sorteio — troca de estado com animação
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 400),
+            transitionBuilder: (child, animation) => FadeTransition(
+              opacity: animation,
+              child: ScaleTransition(scale: animation, child: child),
+            ),
+            child: _sorteioFinalizado
+                ? _cardResultadoSorteio(listaJogadores)
+                : _sorteioEmAndamento
+                    ? _cardAnimacaoSorteio(listaJogadores)
+                    : _cardBotaoSortear(listaJogadores),
+          ),
+
+          const SizedBox(height: 20),
+
+          // Instruções (sempre visíveis)
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -682,9 +675,9 @@ class _TelaJogoImpostorState extends State<TelaJogoImpostor> {
                 ),
                 SizedBox(height: 6),
                 Text(
-                  '1. Em círculo, cada jogador fala UMA palavra relacionada ao tema.\n'
-                  '2. O Impostor precisa fingir e falar algo plausível.\n'
-                  '3. Quando a mesa terminar de debater, cliquem no botão abaixo para acusar!',
+                  '1. Em círculo, cada jogador fala UMA pista sobre o tema.\n'
+                  '2. O Impostor precisa fingir que sabe e blefar.\n'
+                  '3. Quando terminarem, cliquem abaixo para votar!',
                   style: TextStyle(color: _cinzaTexto, fontSize: 12, height: 1.5),
                 ),
               ],
@@ -693,25 +686,206 @@ class _TelaJogoImpostorState extends State<TelaJogoImpostor> {
 
           const SizedBox(height: 28),
 
+          if (_sorteioFinalizado)
+            SizedBox(
+              height: 56,
+              child: ElevatedButton.icon(
+                onPressed: () => setState(() => _faseAtual = FaseJogo.votacao),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _azulPrimario,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                ),
+                icon: const Icon(Icons.how_to_vote),
+                label: const Text(
+                  'Ir para Votação / Acusação',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  /// Card inicial: botão para disparar o sorteio
+  Widget _cardBotaoSortear(List<Player> jogadores) {
+    return Container(
+      key: const ValueKey('btn_sortear'),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: _fundoCampo,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: _borda),
+      ),
+      child: Column(
+        children: [
+          const Icon(Icons.record_voice_over, color: _azulPrimario, size: 48),
+          const SizedBox(height: 12),
+          const Text(
+            'RODADA DE PISTAS!',
+            style: TextStyle(color: _azulEscuro, fontSize: 20, fontWeight: FontWeight.w900),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Sorteie quem dará a primeira pista.\nO impostor nunca começa!',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: _cinzaTexto, fontSize: 13),
+          ),
+          const SizedBox(height: 20),
           SizedBox(
+            width: double.infinity,
             height: 56,
             child: ElevatedButton.icon(
-              onPressed: () => setState(() => _faseAtual = FaseJogo.votacao),
+              onPressed: () => _iniciarAnimacaoSorteio(jogadores),
               style: ElevatedButton.styleFrom(
                 backgroundColor: _azulPrimario,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               ),
-              icon: const Icon(Icons.how_to_vote),
+              icon: const Icon(Icons.casino),
               label: const Text(
-                'Ir para Votação / Acusação',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                'SORTEAR QUEM COMEÇA!',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
               ),
             ),
           ),
         ],
       ),
     );
+  }
+
+  /// Card com nomes ciclando (efeito roleta desacelerando)
+  Widget _cardAnimacaoSorteio(List<Player> jogadores) {
+    final nomeAtual = jogadores.isNotEmpty ? jogadores[_indiceAnimacaoSorteio % jogadores.length].name : '';
+    return Container(
+      key: const ValueKey('anim_sorteio'),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+      decoration: BoxDecoration(
+        color: _fundoConfidencial,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        children: [
+          const Text(
+            'SORTEANDO...',
+            style: TextStyle(
+              color: _azulClaro,
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 2,
+            ),
+          ),
+          const SizedBox(height: 20),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 60),
+            child: Text(
+              nomeAtual,
+              key: ValueKey(nomeAtual + _indiceAnimacaoSorteio.toString()),
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 32,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          const LinearProgressIndicator(
+            backgroundColor: Colors.white24,
+            valueColor: AlwaysStoppedAnimation<Color>(_azulClaro),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Card final com o resultado do sorteio
+  Widget _cardResultadoSorteio(List<Player> jogadores) {
+    final nome = jogadores.isNotEmpty ? jogadores[_indiceQuemComeca].name : '';
+    return Container(
+      key: const ValueKey('resultado_sorteio'),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: _azulPrimario,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: const [
+          BoxShadow(color: Color(0x331A4B9F), blurRadius: 16, offset: Offset(0, 6)),
+        ],
+      ),
+      child: Column(
+        children: [
+          const Icon(Icons.emoji_events, color: Colors.white, size: 36),
+          const SizedBox(height: 10),
+          const Text(
+            'COMEÇA POR:',
+            style: TextStyle(
+              color: Colors.white70,
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 2,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            nome,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 28,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Os demais seguem em ordem na mesa.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.white70, fontSize: 12),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Lógica da animação de roleta com desaceleração progressiva
+  void _iniciarAnimacaoSorteio(List<Player> jogadores) {
+    if (jogadores.isEmpty) return;
+
+    // Delays crescentes simulam a roleta desacelerando
+    final delays = [70, 70, 80, 80, 100, 110, 130, 160, 200, 260, 330, 420, 530];
+
+    int step = 0;
+
+    setState(() {
+      _sorteioEmAndamento = true;
+      _sorteioFinalizado = false;
+      _indiceAnimacaoSorteio = 0;
+    });
+
+    void proximoPasso() {
+      if (!mounted) return;
+
+      if (step >= delays.length) {
+        // Finaliza: exibe o sorteado real
+        setState(() {
+          _sorteioEmAndamento = false;
+          _sorteioFinalizado = true;
+          _indiceAnimacaoSorteio = _indiceQuemComeca;
+        });
+        return;
+      }
+
+      setState(() {
+        _indiceAnimacaoSorteio = (_indiceAnimacaoSorteio + 1) % jogadores.length;
+      });
+
+      Future.delayed(Duration(milliseconds: delays[step]), () {
+        step++;
+        proximoPasso();
+      });
+    }
+
+    Future.delayed(const Duration(milliseconds: 70), proximoPasso);
   }
 
   // =========================================================================
@@ -899,7 +1073,7 @@ class _TelaJogoImpostorState extends State<TelaJogoImpostor> {
         ),
         content: const Text(
           '1. O celular passa na mão de cada um em segredo.\n'
-          '2. Quem for Cidadão verá a Palavra Secreta.\n'
+          '2. Quem for Jogador(a) verá a Palavra Secreta.\n'
           '3. O Impostor verá que é o impostor e não sabe a palavra!\n'
           '4. Na mesa, todos falam pistas curtas.\n'
           '5. No fim, a mesa vota para descobrir quem mentiu.',
