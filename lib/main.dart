@@ -1,11 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:playzzo/views/tela_login.dart';
 import 'models/setup_jogo_impostor_model.dart';
 import 'views/tela_setup_impostor.dart';
 import 'views/tela_jogo_impostor.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Conexão oficial com o Supabase
+  await Supabase.initialize(
+    url: 'https://uiwwoeuwidbizktkpaxm.supabase.co',
+    anonKey: 'sb_publishable_YmjSf9xR0DuZtn5xdajeTA_yRskVoCI',
+  );
+
   runApp(
     // Provider que disponibiliza o SetupState para o jogo Impostor
     ChangeNotifierProvider<SetupState>(
