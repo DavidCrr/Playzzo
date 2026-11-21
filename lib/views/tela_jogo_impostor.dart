@@ -34,9 +34,9 @@ class TelaJogoImpostor extends StatelessWidget {
             const SizedBox(height: 8),
             Expanded(
               child: ListView.builder(
-                itemCount: setup.players.length,
+                itemCount: setup.jogadores.length,
                 itemBuilder: (context, i) {
-                  final p = setup.players[i];
+                  final p = setup.jogadores[i];
                   return ListTile(
                     leading: CircleAvatar(
                       backgroundColor: const Color(0xFF1A4B9F),
@@ -49,11 +49,11 @@ class TelaJogoImpostor extends StatelessWidget {
               ),
             ),
             // Desafio / prenda (se estiver ativo)
-            if (setup.challengeEnabled) ...[
+            if (setup.desafioAtivo) ...[
               const Divider(),
               const Text('Prenda', style: TextStyle(fontWeight: FontWeight.w600)),
               const SizedBox(height: 4),
-              Text(setup.penalty),
+              Text(setup.penalidade),
             ],
             const SizedBox(height: 16),
             // Botão para avançar para a próxima fase (ex.: jogar)
