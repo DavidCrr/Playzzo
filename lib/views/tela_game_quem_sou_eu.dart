@@ -105,12 +105,29 @@ class _TelaQuemSouEuState extends State<TelaQuemSouEu> {
         builder: (context) => TelaRanking(
           resultado: ResultadoPartida(
             nomeJogo: 'Quem Sou Eu?',
+            prenda: 'Pagar a rodada de pizza e o refri da galera! 🍕',
+            nomePerdedorPrenda: 'Paulo',
             ranking: [
               JogadorPontuacao(
                 nome: _nomeJogador,
                 pontos: _pontos,
-                detalhe: '$_pontos pontos conquistados na rodada',
-                destaqueVencedor: true,
+                detalhe: 'Sua pontuação na rodada',
+                destaqueVencedor: _pontos >= 300,
+              ),
+              const JogadorPontuacao(
+                nome: 'Ana Julia',
+                pontos: 300,
+                detalhe: '3 cartas acertadas',
+              ),
+              const JogadorPontuacao(
+                nome: 'Marcos PP',
+                pontos: 200,
+                detalhe: '2 cartas acertadas',
+              ),
+              const JogadorPontuacao(
+                nome: 'Paulo',
+                pontos: 100,
+                detalhe: '1 carta acertada (Lanterna)',
               ),
             ],
             onJogarNovamente: () {
