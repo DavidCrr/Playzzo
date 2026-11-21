@@ -1,5 +1,8 @@
 import 'dart:async'; // necessário para o Timer (cronômetro)
 import 'package:flutter/material.dart';
+import 'package:playzzo/services/auth_service.dart';
+import '../models/resultado_jogo.dart';
+import 'tela_ranking.dart';
 
 const Color _azulPrimario = Color(0xFF1A4B9F);
 const Color _azulEscuro = Color(0xFF0A1B3F);
@@ -46,7 +49,7 @@ class _TelaQuemSouEuState extends State<TelaQuemSouEu> {
   Carta get _cartaAtual => _cartas[_indice];
 
 
-  final String _nomeJogador = 'Lucas Mendes';
+  String get _nomeJogador => AuthService.usuarioAtual?.nome ?? 'Lucas Mendes';
 
 
   // =====================================
@@ -96,28 +99,29 @@ class _TelaQuemSouEuState extends State<TelaQuemSouEu> {
   void _fimDeJogo() {
     _timer?.cancel();
 
-    showDialog(
-      context: context,
-      barrierDismissible: false, // não fecha clicando fora
-      builder: (context) => AlertDialog(
-        title: const Text('Fim de jogo!'),
-        content: Text('$_nomeJogador fez $_pontos pontos.'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context); // fecha a caixa
-              Navigator.pop(context); // sai da tela do jogo
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TelaRanking(
+          resultado: ResultadoPartida(
+            nomeJogo: 'Quem Sou Eu?',
+            ranking: [
+              JogadorPontuacao(
+                nome: _nomeJogador,
+                pontos: _pontos,
+                detalhe: '$_pontos pontos conquistados na rodada',
+                destaqueVencedor: true,
+              ),
+            ],
+            onJogarNovamente: () {
+              Navigator.pop(context); // fecha a tela de ranking
+              setState(_novaPartida); // recomeça o jogo
             },
-            child: const Text('Sair'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context); // fecha a caixa
-              setState(_novaPartida); // recomeça
+            onVoltarMenu: () {
+              Navigator.of(context).popUntil((route) => route.isFirst);
             },
-            child: const Text('Jogar de novo'),
           ),
-        ],
+        ),
       ),
     );
   }
