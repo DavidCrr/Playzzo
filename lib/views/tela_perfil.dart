@@ -196,48 +196,42 @@ class _TelaPerfilState extends State<TelaPerfil> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                GestureDetector (
+                _rotulo('Senha'),
+                GestureDetector(
                   onTap: () {
                     Navigator.push(
-                    context, 
-                    MaterialPageRoute(
-                      builder:(context) =>
-                        const TelaAlterarSenha(esqueceuSenha: false),
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            const TelaAlterarSenha(esqueceuSenha: false),
                       ),
                     );
                   },
                   child: Container(
-                    padding: const EdgeInsets.all(14),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 16),
                     decoration: BoxDecoration(
                       color: _fundoCampo,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Row(
                       children: [
-                        CircleAvatar(
-                          radius: 20,
-                          backgroundColor: Colors.white,
-                          child: Icon(Icons.password,
-                          color: _azulPrimario,
-                          size: 20,
-                            ),
-                          ),
-                          SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              'Alterar senha',
-                              style: TextStyle(
-                                color: _azulEscuro,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
+                        Icon(Icons.vpn_key_outlined, color: _cinzaIcone),
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            'Alterar senha',
+                            style: TextStyle(
+                              color: _azulEscuro,
+                              fontSize: 16,
                             ),
                           ),
                         ),
                         Icon(Icons.chevron_right, color: _azulEscuro),
                       ],
                     ),
-                  ),   
-                ),                
+                  ),
+                ),            
                 const SizedBox(height: 50),
                 SizedBox(
                 height: 56,
