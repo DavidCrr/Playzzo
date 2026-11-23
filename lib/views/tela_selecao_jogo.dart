@@ -180,44 +180,6 @@ class GameSelectionScreen extends StatefulWidget {
 class _GameSelectionScreenState extends State<GameSelectionScreen> {
   int _indiceAtual = 0;
 
-  void _abrirRegras() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: brancoPuro,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
-              Text(
-                'Regras Rápidas',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w900,
-                  color: azulMarinho,
-                ),
-              ),
-              SizedBox(height: 12),
-              Text(
-                '• Todos jogam no mesmo aparelho, passando a vez a cada rodada.\n'
-                '• Defina o tempo e a quantidade de jogadores antes de iniciar.',
-                style: TextStyle(
-                  fontSize: 14,
-                  height: 1.5,
-                  color: azulMarinho,
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
 
   Widget _buildConteudoAba() {
     if (_indiceAtual == 1) {
@@ -279,25 +241,6 @@ class _GameSelectionScreenState extends State<GameSelectionScreen> {
               ),
             ),
             const SizedBox(width: 12),
-            TextButton.icon(
-              onPressed: _abrirRegras,
-              icon: const Icon(Icons.menu_book_rounded, size: 16, color: azulCobalto),
-              label: const Text(
-                'Regras',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w800,
-                  color: azulCobalto,
-                ),
-              ),
-              style: TextButton.styleFrom(
-                backgroundColor: azulCeleste.withOpacity(0.16),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
           ],
         ),
         const SizedBox(height: 12),
@@ -346,28 +289,6 @@ class _GameSelectionScreenState extends State<GameSelectionScreen> {
           },
         ),
         GameCard(
-          title: 'O Impostor',
-          description: 'Descubra quem não sabe a palavra secreta da rodada',
-          leadingIcon: SvgPicture.asset(
-            'assets/icons/spy.svg',
-            width: 32,
-            height: 32,
-            colorFilter: const ColorFilter.mode(azulCobalto, BlendMode.srcIn),
-          ),
-          primeiraTag: '3 a 8 Jogadores',
-          iconePrimeiraTag: Icons.groups_rounded,
-          segundaTag: 'Papéis Secretos',
-          iconeSegundaTag: Icons.visibility_off_outlined,
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const GameConfigScreen(gameTitle: 'O Impostor'),
-              ),
-            );
-          },
-        ),
-        GameCard(
           title: 'Bomba Relógio',
           description: 'Fale rápido e passe o celular antes da explosão',
           leadingIcon: SvgPicture.asset(
@@ -385,6 +306,28 @@ class _GameSelectionScreenState extends State<GameSelectionScreen> {
               context,
               MaterialPageRoute(
                 builder: (context) => const GameConfigScreen(gameTitle: 'Bomba Relógio'),
+              ),
+            );
+          },
+        ),
+        GameCard(
+          title: 'O Impostor',
+          description: 'Descubra quem não sabe a palavra secreta da rodada',
+          leadingIcon: SvgPicture.asset(
+            'assets/icons/spy.svg',
+            width: 32,
+            height: 32,
+            colorFilter: const ColorFilter.mode(azulCobalto, BlendMode.srcIn),
+          ),
+          primeiraTag: '3 a 8 Jogadores',
+          iconePrimeiraTag: Icons.groups_rounded,
+          segundaTag: 'Papéis Secretos',
+          iconeSegundaTag: Icons.visibility_off_outlined,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const GameConfigScreen(gameTitle: 'O Impostor'),
               ),
             );
           },
