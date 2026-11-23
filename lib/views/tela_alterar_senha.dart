@@ -8,8 +8,6 @@ const Color _cinzaIcone = Color(0xFF737783);
 const Color _fundoCampo = Color.fromARGB(255, 232, 233, 236);
 
 class TelaAlterarSenha extends StatefulWidget {
-  // true  = veio do login ("Esqueceu a senha?")
-  // false = veio do perfil (usuário já está logado)
   final bool esqueceuSenha;
 
   const TelaAlterarSenha({super.key, required this.esqueceuSenha});
@@ -20,16 +18,19 @@ class TelaAlterarSenha extends StatefulWidget {
 
 class _TelaAlterarSenhaState extends State<TelaAlterarSenha> {
   final _emailController = TextEditingController();
+  final _codigoController = TextEditingController();
   final _senhaAtualController = TextEditingController();
   final _novaSenhaController = TextEditingController();
   final _confirmarController = TextEditingController();
 
   bool _senhasOcultas = true;
   bool _carregando = false;
+  bool _codigoEnviado = false;
 
   @override
   void dispose() {
     _emailController.dispose();
+    _codigoController.dispose();
     _senhaAtualController.dispose();
     _novaSenhaController.dispose();
     _confirmarController.dispose();
@@ -85,12 +86,37 @@ class _TelaAlterarSenhaState extends State<TelaAlterarSenha> {
       onPressed: () => setState(() => _senhasOcultas = !_senhasOcultas),
     );
   }
+  Future<void> _enviarCodigo() async{
+    final email = _emailController.text.trim();
+
+    if(!email.contains('@')) {
+      _mostrarMensagem('Digite um e-mail válido.');
+      return;
+    }
+    setState(() => _carregando = true);
+    try {
+      await AuthService.enviarCodigoRecuperacao(email);
+      if (!mounted) return;
+      setState(() => _codigoEnviado = true);
+      _mostrarMensagem('Se o e-mail estiver cadastrado, você receberá um código.');
+    }
+    on ErroApi catch(erro) {
+      _mostrarMensagem(erro.mensagem);
+    }
+    finally {
+      if (mounted) setState(() => _carregando = false);
+    }
+  }
 
   Future<void> _alterarSenha() async{
     final novaSenha = _novaSenhaController.text;
     final confirmar = _confirmarController.text;
-  
-    // Verificações iguais para os dois casos
+    final codigo = _codigoController.text.trim();
+
+    if (widget.esqueceuSenha && codigo.isEmpty) {
+      _mostrarMensagem('Digite o código recebido por e-mail');
+      return;
+    }
     if (novaSenha.length < 8) {
       _mostrarMensagem('A nova senha precisa ter no mínimo 8 caracteres.');
       return;
@@ -104,7 +130,7 @@ class _TelaAlterarSenhaState extends State<TelaAlterarSenha> {
     try{
       if(widget.esqueceuSenha) {
         await AuthService.redefinirSenha(
-          _emailController.text.trim(), novaSenha
+          _emailController.text.trim(), codigo, novaSenha
         );
       } else {
         await AuthService.alterarSenha(
@@ -123,6 +149,7 @@ class _TelaAlterarSenhaState extends State<TelaAlterarSenha> {
 
   @override
   Widget build(BuildContext context) {
+    final etapaEnviarCodigo = widget.esqueceuSenha && !_codigoEnviado;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -157,9 +184,10 @@ class _TelaAlterarSenhaState extends State<TelaAlterarSenha> {
                 const SizedBox(height: 24),
 
                 Text(
-                  widget.esqueceuSenha
-                      ? 'Informe o e-mail da sua conta e escolha uma nova senha.'
-                      : 'Confirme sua senha atual e escolha uma nova senha.',
+                  !widget.esqueceuSenha
+                      ? 'Confirme sua senha atual e escolha uma nova senha.'
+                      : etapaEnviarCodigo ? 'Informe o e-mail da sua conta. Vamos enviar um código para você.' 
+                      : 'Digite o código que enviamos para o seu e-mail e escolha uma nova senha.',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     color: _cinzaTexto,
@@ -175,12 +203,32 @@ class _TelaAlterarSenhaState extends State<TelaAlterarSenha> {
                   _rotulo('E-mail da conta'),
                   TextField(
                     controller: _emailController,
+                    readOnly: _codigoEnviado,
                     keyboardType: TextInputType.emailAddress,
                     decoration: _decoracaoCampo(
                       dica: 'seuemail@exemplo.com',
                       icone: Icons.mail_outline,
                     ),
                   ),
+                  if (_codigoEnviado) ...[
+                    const SizedBox(height: 16),
+                    _rotulo('Código recebido por e-mail'),
+                    TextField(
+                      controller: _codigoController,
+                      keyboardType: TextInputType.number,
+                      decoration: _decoracaoCampo(
+                        dica: 'Digite o código',
+                        icone: Icons.vpn_key_outlined,
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: _carregando ? null : _enviarCodigo,
+                        child: const Text('Reenviar código'),
+                      ),
+                    ),
+                  ]
                 ] else ...[
                   _rotulo('Senha atual'),
                   TextField(
@@ -196,12 +244,14 @@ class _TelaAlterarSenhaState extends State<TelaAlterarSenha> {
 
                 const SizedBox(height: 16),
 
+                if(!etapaEnviarCodigo)...[
+
                 _rotulo('Nova senha'),
                 TextField(
                   controller: _novaSenhaController,
                   obscureText: _senhasOcultas,
                   decoration: _decoracaoCampo(
-                    dica: 'Mínimo 6 caracteres',
+                    dica: 'Mínimo 8 caracteres',
                     icone: Icons.lock_outline,
                     sufixo: _botaoOlho(),
                   ),
@@ -219,13 +269,14 @@ class _TelaAlterarSenhaState extends State<TelaAlterarSenha> {
                     sufixo: _botaoOlho(),
                   ),
                 ),
+              ],
 
                 const SizedBox(height: 32),
 
                 SizedBox(
                   height: 56,
                   child: ElevatedButton(
-                    onPressed: _carregando ? null : _alterarSenha,
+                    onPressed: _carregando ? null : (etapaEnviarCodigo ? _enviarCodigo : _alterarSenha),
                     style: ElevatedButton.styleFrom(
                       disabledBackgroundColor: _azulPrimario,
                       backgroundColor: _azulPrimario,
@@ -243,8 +294,8 @@ class _TelaAlterarSenhaState extends State<TelaAlterarSenha> {
                               strokeWidth: 2.5,
                             ),
                           )
-                    : const Text(
-                      'Salvar nova senha',
+                    : Text(
+                      etapaEnviarCodigo ? 'Enviar código' : 'Salvar nova senha',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,

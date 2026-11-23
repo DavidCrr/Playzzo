@@ -32,6 +32,12 @@ class AuthService {
       if (msg.contains('email not confirmed')) {
         return ErroApi('Confirme seu e-mail antes de entrar.');
       }
+      if (msg.contains('token')) {
+        return ErroApi('Código inválido ou expirado.');
+      }
+      if (msg.contains('rate limit') || msg.contains('security purposes')) {
+        return ErroApi('Muitas tentativas. Aguarde alguns minutos e tente de novo.');
+      }
       return ErroApi(e.message);
     }
 
@@ -119,7 +125,33 @@ class AuthService {
     await _supabase.auth.signOut();
     usuarioAtual = null;
   }
-  static Future<void> redefinirSenha(String email, String novaSenha) async {
-    throw ErroApi('Recuperação de senha será feita na próxima etapa.');
+  //Enviar um código no e-mail para iniciar a recuperação
+  static Future<void> enviarCodigoRecuperacao(String email) async {
+    try{
+      await _supabase.auth.resetPasswordForEmail(email);
+    } 
+    catch (e) {
+      throw _erro(e);
+    }
+  }
+  //Redefinir senha, aqui ele confere o código e grava a nova senha
+  static Future<void> redefinirSenha(String email, String codigo, String novaSenha) async {
+    //verifica o token e permite trocar a senha
+    try{
+      await _supabase.auth.verifyOTP(
+        email: email,
+        token: codigo,
+        type: OtpType.recovery,
+      );
+      //grava o registro da nova senha
+      await _supabase.auth.updateUser(UserAttributes(password: novaSenha));
+    }
+    catch (e) {
+      throw _erro(e);
+    }
+    finally {
+      //encerra a sessão
+      await _supabase.auth.signOut();
+    }
   }
 }
