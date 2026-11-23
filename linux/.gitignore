@@ -1,1 +1,16 @@
 flutter/ephemeral
+# Flutter/Dart/Pub related
+.dart_tool/
+.packages
+.pub/
+build/
+flutter_*.symlinks
+.idea/
+.vscode/
+
+# Generated files (Android, iOS, Linux, macOS, Windows)
+android/app/generated/
+ios/Runner/GeneratedPluginRegistrant.*
+linux/flutter/generated_plugins.cmake
+macos/Flutter/GeneratedPluginRegistrant.*
+windows/flutter/generated_plugins.cmake
