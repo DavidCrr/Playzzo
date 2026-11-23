@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'tela_jogo_mimica.dart';
 
 const Color azulCobalto = Color(0xFF1A4B9F);
 const Color azulCeleste = Color(0xFF72BBE0);
@@ -233,6 +234,17 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
 
     switch (widget.gameTitle) {
       case 'Mímica':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MimicaGameScreen(
+              participantes: List<String>.from(_participantes),
+              tempoSelecionado: _tempoSelecionado,
+              tema: _temaSelecionado,
+              pontosParaVencer: _pontosParaVencer,
+            ),
+          ),
+        );
         break;
       case 'Quem Sou Eu?':
         break;
