@@ -88,29 +88,6 @@ class _TelaPerfilState extends State<TelaPerfil> {
   @override
   Widget build(BuildContext context) {
     return Scaffold (
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-        title: const Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.sports_esports,
-            color: _azulPrimario,
-            size: 33,
-            ),
-            SizedBox(width: 8),
-            Text(
-              'PLAYZZO',
-              style: TextStyle(
-                color: _azulPrimario,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(

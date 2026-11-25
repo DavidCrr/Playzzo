@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:playzzo/widgets/playzzo_app_bar.dart';
 import 'package:provider/provider.dart';
 import '../models/setup_jogo_impostor_model.dart';
 
@@ -21,22 +22,7 @@ class TelaSetupImpostor extends StatelessWidget {
     const pink = Color(0xFFF07A9A);
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: primary,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: Row(
-          children: const [
-            // Logo placeholder – ajuste conforme o asset real
-            // Image.asset('assets/logo.png', height: 28),
-            // SizedBox(width: 8),
-            Text('Configuração da Sala'),
-          ],
-        ),
-        elevation: 2,
-      ),
+      appBar: const PlayzzoAppBar(titulo: 'Configuração da Sala', icone: null),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(

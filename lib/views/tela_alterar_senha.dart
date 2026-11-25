@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:playzzo/widgets/playzzo_app_bar.dart';
 import 'package:playzzo/services/auth_service.dart';
 
 const Color _azulPrimario = Color(0xFF1A4B9F);
@@ -151,29 +152,7 @@ class _TelaAlterarSenhaState extends State<TelaAlterarSenha> {
   Widget build(BuildContext context) {
     final etapaEnviarCodigo = widget.esqueceuSenha && !_codigoEnviado;
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-                title: const Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.sports_esports,
-            color: _azulPrimario,
-            size: 33,
-            ),
-            SizedBox(width: 8),
-            Text(
-              'PLAYZZO',
-              style: TextStyle(
-                color: _azulPrimario,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ),
+      appBar: const PlayzzoAppBar(),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(

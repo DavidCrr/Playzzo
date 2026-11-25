@@ -1,5 +1,6 @@
 import 'dart:async'; // necessário para o Timer (cronômetro)
 import 'package:flutter/material.dart';
+import 'package:playzzo/widgets/playzzo_app_bar.dart';
 import 'package:playzzo/services/auth_service.dart';
 import '../models/resultado_jogo.dart';
 import 'tela_ranking.dart';
@@ -236,24 +237,7 @@ class _TelaQuemSouEuState extends State<TelaQuemSouEu> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-      backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-        title: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              //adicionar icon que está na tela de seleção que foi definido para esse jogo
-              'PLAYZZO - QUEM SOU EU?',
-              style: TextStyle(
-                color: _azulPrimario,
-                fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ),
+      appBar: const PlayzzoAppBar(),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),

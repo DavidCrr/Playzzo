@@ -1,45 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:playzzo/widgets/playzzo_app_bar.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'tela_config_jogo.dart';
+import 'tela_perfil.dart';
 
 const Color azulCobalto = Color(0xFF1A4B9F);
 const Color azulCeleste = Color(0xFF72BBE0);
 const Color brancoPuro = Color(0xFFFFFFFF);
 const Color azulMarinho = Color(0xFF0A1B3F);
 const Color rosaCoral = Color(0xFFF07A9A);
-
-class PlayzzoAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final String titleText;
-
-  const PlayzzoAppBar({super.key, required this.titleText});
-
-  @override
-  Widget build(BuildContext context) {
-    return AppBar(
-      backgroundColor: azulCobalto,
-      elevation: 0,
-      centerTitle: true,
-      title: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.sports_esports, color: brancoPuro, size: 24),
-          const SizedBox(width: 8),
-          Text(
-            titleText,
-            style: const TextStyle(
-              color: brancoPuro,
-              fontWeight: FontWeight.w900,
-              fontSize: 20,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
-}
 
 class _InfoTag extends StatelessWidget {
   final IconData icon;
@@ -196,16 +165,7 @@ class _GameSelectionScreenState extends State<GameSelectionScreen> {
     }
 
     if (_indiceAtual == 2) {
-      return const Center(
-        child: Text(
-          'Perfil do jogador',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            color: azulMarinho,
-          ),
-        ),
-      );
+      return const TelaPerfil();
     }
 
     return ListView(
@@ -338,15 +298,9 @@ class _GameSelectionScreenState extends State<GameSelectionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final tituloTopo = _indiceAtual == 1
-        ? 'Histórico'
-        : _indiceAtual == 2
-            ? 'Perfil'
-            : 'Playzzo';
-
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-      appBar: PlayzzoAppBar(titleText: tituloTopo),
+            appBar: const PlayzzoAppBar(),
       body: _buildConteudoAba(),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,

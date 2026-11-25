@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:playzzo/widgets/playzzo_app_bar.dart';
 import '../models/resultado_jogo.dart';
 import '../services/ranking_service.dart';
 
@@ -51,26 +52,7 @@ class _TelaRankingState extends State<TelaRanking> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-        automaticallyImplyLeading: false,
-        title: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.sports_esports, color: _azulPrimario, size: 30),
-            SizedBox(width: 8),
-            Text(
-              'PLAYZZO',
-              style: TextStyle(
-                color: _azulPrimario,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ),
+      appBar: const PlayzzoAppBar(automaticallyImplyLeading: false),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
