@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:playzzo/widgets/playzzo_app_bar.dart';
 import 'package:provider/provider.dart';
 import '../models/resultado_jogo.dart';
 import '../models/setup_jogo_impostor_model.dart';
@@ -180,29 +181,7 @@ class _TelaJogoImpostorState extends State<TelaJogoImpostor> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: _azulEscuro),
-          onPressed: () => Navigator.pop(context),
-        ),
-        centerTitle: true,
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.theater_comedy, color: _azulPrimario, size: 26),
-            const SizedBox(width: 8),
-            Text(
-              'IMPOSTOR',
-              style: const TextStyle(
-                color: _azulPrimario,
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-            ),
-          ],
-        ),
+      appBar: PlayzzoAppBar(
         actions: [
           IconButton(
             icon: const Icon(Icons.help_outline, color: _azulEscuro),

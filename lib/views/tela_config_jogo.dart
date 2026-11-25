@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:playzzo/widgets/playzzo_app_bar.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'tela_jogo_mimica.dart';
 
 const Color azulCobalto = Color(0xFF1A4B9F);
 const Color azulCeleste = Color(0xFF72BBE0);
@@ -102,33 +102,33 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
       case 'Mímica':
         return SvgPicture.asset(
           'assets/icons/mask.svg',
-          width: 24,
-          height: 24,
-          colorFilter: const ColorFilter.mode(brancoPuro, BlendMode.srcIn),
+          width: 33,
+          height: 33,
+          colorFilter: const ColorFilter.mode(azulCobalto, BlendMode.srcIn),
         );
       case 'Quem Sou Eu?':
         return SvgPicture.asset(
           'assets/icons/face.svg',
-          width: 24,
-          height: 24,
-          colorFilter: const ColorFilter.mode(brancoPuro, BlendMode.srcIn),
+          width: 33,
+          height: 33,
+          colorFilter: const ColorFilter.mode(azulCobalto, BlendMode.srcIn),
         );
       case 'O Impostor':
         return SvgPicture.asset(
           'assets/icons/spy.svg',
-          width: 24,
-          height: 24,
-          colorFilter: const ColorFilter.mode(brancoPuro, BlendMode.srcIn),
+          width: 33,
+          height: 33,
+          colorFilter: const ColorFilter.mode(azulCobalto, BlendMode.srcIn),
         );
       case 'Bomba Relógio':
         return SvgPicture.asset(
           'assets/icons/bomb.svg',
-          width: 24,
-          height: 24,
-          colorFilter: const ColorFilter.mode(brancoPuro, BlendMode.srcIn),
+          width: 33,
+          height: 33,
+          colorFilter: const ColorFilter.mode(azulCobalto, BlendMode.srcIn),
         );
       default:
-        return const Icon(Icons.sports_esports, color: brancoPuro, size: 24);
+        return const Icon(Icons.sports_esports, color: azulCobalto, size: 33);
     }
   }
 
@@ -234,17 +234,6 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
 
     switch (widget.gameTitle) {
       case 'Mímica':
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => MimicaGameScreen(
-              participantes: List<String>.from(_participantes),
-              tempoSelecionado: _tempoSelecionado,
-              tema: _temaSelecionado,
-              pontosParaVencer: _pontosParaVencer,
-            ),
-          ),
-        );
         break;
       case 'Quem Sou Eu?':
         break;
@@ -270,27 +259,7 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-      appBar: AppBar(
-        backgroundColor: azulCobalto,
-        elevation: 0,
-        centerTitle: true,
-        iconTheme: const IconThemeData(color: brancoPuro),
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildGameIcon(),
-            const SizedBox(width: 8),
-            Text(
-              widget.gameTitle,
-              style: const TextStyle(
-                color: brancoPuro,
-                fontWeight: FontWeight.w900,
-                fontSize: 20,
-              ),
-            ),
-          ],
-        ),
-      ),
+      appBar: PlayzzoAppBar(titulo: widget.gameTitle, icone: _buildGameIcon()),
       body: Column(
         children: [
           Expanded(

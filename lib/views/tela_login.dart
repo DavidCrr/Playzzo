@@ -1,9 +1,11 @@
 //Inserindo bibliotecas
 import 'package:flutter/material.dart';
+import 'package:playzzo/widgets/playzzo_app_bar.dart';
 import 'tela_cadastro.dart';
 import 'tela_perfil.dart';
 import 'package:playzzo/services/auth_service.dart';
 import 'tela_alterar_senha.dart';
+import 'tela_selecao_jogo.dart';
 
 const Color _azulPrimario = Color(0xFF1A4B9F);
 
@@ -48,8 +50,7 @@ class _TelaLoginState extends State<TelaLogin> {
       if (!mounted) return;
       Navigator.push(
       context,
-      MaterialPageRoute(builder:(context) => const TelaPerfil()
-        ),
+      MaterialPageRoute(builder:(context) => const GameSelectionScreen()),
       );
     }
     on ErroApi catch(erro) {
@@ -73,30 +74,7 @@ class _TelaLoginState extends State<TelaLogin> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        //barra de aplicativos
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true, //Alinha esse widget todo ao centro
-
-        title: const Row(
-          mainAxisSize: MainAxisSize.min, //ocupa o mínimo de espaço e atua junto com o centerTitle
-
-          children: [
-            Icon(
-              Icons.sports_esports,
-              color: Color(0xFF1A4B9F),
-              size: 33,
-            ),
-            SizedBox(width: 8), //Esse sized box vai delimitar o espaço do ícone
-            Text('PLAYZZO',
-                style: TextStyle(
-                    color: Color(0xFF1A4B9F), //cor padrão
-                    fontWeight: FontWeight.bold //fonte em negrito
-                    ))
-          ],
-        ),
-      ),
+      appBar: const PlayzzoAppBar(),
 
       //Iniciando estrutura
       body: SafeArea(

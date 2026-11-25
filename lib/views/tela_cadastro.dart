@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:playzzo/widgets/playzzo_app_bar.dart';
 import 'package:playzzo/services/auth_service.dart';
 
 //Já definindo as váriaveis das cores para poder reaproveitar, ver de fazer isso nas outras telas.
@@ -120,37 +121,7 @@ class _TelaCadastroState extends State<TelaCadastro> {
   Widget build(BuildContext context) {
     return Scaffold(
       //Appbar como icon e nome do sistema
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-        leading: IconButton(
-          //clicou na flecha de voltar, ele volta para a primeira página pilha
-          icon: const Icon(
-            Icons.arrow_back,
-            color: _azulEscuro
-            ),
-          onPressed:() => Navigator.maybePop(context),
-        ),
-        title: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.sports_esports,
-              color: _azulPrimario,
-              size: 33
-            ),
-            SizedBox(width: 8),
-            Text(
-              'PLAYZZO',
-              style: TextStyle(
-                color: _azulPrimario,
-                fontWeight: FontWeight.bold
-              ),
-            ),
-          ],
-        ),
-      ),
+      appBar: const PlayzzoAppBar(),
       //Body iniciando com os textos de apresentação e partindo para o formulário
       body: SafeArea(
         child: SingleChildScrollView(
