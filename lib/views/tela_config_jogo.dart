@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:playzzo/widgets/playzzo_app_bar.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'tela_jogo_mimica.dart';
 
 const Color azulCobalto = Color(0xFF1A4B9F);
 const Color azulCeleste = Color(0xFF72BBE0);
@@ -31,15 +32,20 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
     'Longo - 90 seg',
   ];
 
-  final List<int> _opcoesPontos = const [5, 10, 15, 20];
+  final List<int> _opcoesRodadas = const [5, 10, 15, 20];
 
   late String _tempoSelecionado;
-  late String _temaSelecionado;
-  late int _pontosParaVencer;
+  late int _limiteRodadas;
+
+  List _temasBanco = [];
+  int? _temaIdSelecionado;
+  String _temaNomeSelecionado = '';
+  bool _carregandoTemas = true;
+  String? _erroTemas;
 
   bool get _usaTempo => widget.gameTitle != 'O Impostor';
 
-  bool get _usaPontosVitoria =>
+  bool get _usaLimiteRodadas =>
       widget.gameTitle == 'Mímica' || widget.gameTitle == 'Quem Sou Eu?';
 
   int get _minimoJogadores {
@@ -51,40 +57,113 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
     }
   }
 
-  bool get _podeIniciar => _participantes.length >= _minimoJogadores;
+  bool get _podeIniciar =>
+      _participantes.length >= _minimoJogadores &&
+      !_carregandoTemas &&
+      _temasBanco.isNotEmpty &&
+      _temaNomeSelecionado.isNotEmpty;
 
-  List<String> _opcoesTemasPorJogo() {
+  int? _converterParaInt(dynamic valor) {
+    if (valor == null) return null;
+    if (valor is int) return valor;
+    return int.tryParse(valor.toString());
+  }
+
+  String _codigoEsperadoJogo() {
     switch (widget.gameTitle) {
       case 'Mímica':
-        return const [
-          'Filmes e Séries',
-          'Objetos do Dia a Dia',
-          'Ações e Profissões',
-          'Animais',
-        ];
+        return 'MIMICA';
       case 'Quem Sou Eu?':
-        return const [
-          'Personagens Famosos',
-          'Comidas e Bebidas',
-          'Lugares do Mundo',
-          'Heróis e Vilões',
-        ];
-      case 'Bomba Relógio':
-        return const [
-          'Palavras com Letra Sorteada',
-          'Coisas que Cabem na Mochila',
-          'Marcas e Jogos',
-          'Fatos do Cotidiano',
-        ];
+        return 'QUEM_SOU_EU';
       case 'O Impostor':
-        return const [
-          'Cenários e Lugares',
-          'Comidas Típicas',
-          'Objetos de Festa',
-          'Esportes e Lazer',
-        ];
+        return 'IMPOSTOR';
+      case 'Bomba Relógio':
+        return 'BOMBA_RELOGIO';
       default:
-        return const ['Geral'];
+        return widget.gameTitle.toUpperCase();
+    }
+  }
+
+  Future<void> _carregarTemasDoBanco() async {
+    setState(() {
+      _carregandoTemas = true;
+      _erroTemas = null;
+    });
+
+    try {
+      final client = Supabase.instance.client;
+      final codigoAlvo = _codigoEsperadoJogo();
+
+      final jogosRes = await client
+          .from('jogo')
+          .select('id, codigo, nome')
+          .eq('ativo', true);
+
+      final jogos = jogosRes as List;
+      int? jogoIdEncontrado;
+
+      for (final rawJogo in jogos) {
+        final jogo = rawJogo as Map;
+        final codigo = (jogo['codigo'] ?? '').toString().trim().toUpperCase();
+        final nome = (jogo['nome'] ?? '').toString().trim().toLowerCase();
+        if (codigo == codigoAlvo ||
+            codigo == 'MÍMICA' && codigoAlvo == 'MIMICA' ||
+            nome.contains(widget.gameTitle.toLowerCase())) {
+          jogoIdEncontrado = _converterParaInt(jogo['id']);
+          break;
+        }
+      }
+
+      var queryTemas = client
+          .from('tema')
+          .select('id, nome_tema, jogo_id')
+          .eq('ativo', true);
+
+      if (jogoIdEncontrado != null) {
+        queryTemas = queryTemas.eq('jogo_id', jogoIdEncontrado);
+      }
+
+      final temasRes = await queryTemas.order('nome_tema', ascending: true);
+      final rawTemas = temasRes as List;
+      final temasCarregados = [];
+
+      for (final rawTema in rawTemas) {
+        final item = rawTema as Map;
+        final id = _converterParaInt(item['id']);
+        final nome = (item['nome_tema'] ?? '').toString().trim();
+        if (id != null && nome.isNotEmpty) {
+          temasCarregados.add({
+            'id': id,
+            'nome_tema': nome,
+          });
+        }
+      }
+
+      if (!mounted) return;
+
+      setState(() {
+        _temasBanco = temasCarregados;
+        if (_temasBanco.isNotEmpty) {
+          final primeiro = _temasBanco.first as Map;
+          _temaIdSelecionado = _converterParaInt(primeiro['id']);
+          _temaNomeSelecionado = primeiro['nome_tema'].toString();
+        } else {
+          _temaIdSelecionado = null;
+          _temaNomeSelecionado = '';
+          _erroTemas =
+              'Nenhum tema cadastrado no banco para ${widget.gameTitle}.';
+        }
+        _carregandoTemas = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _temasBanco = [];
+        _temaIdSelecionado = null;
+        _temaNomeSelecionado = '';
+        _erroTemas = 'Erro ao carregar temas do banco: $e';
+        _carregandoTemas = false;
+      });
     }
   }
 
@@ -92,9 +171,8 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
   void initState() {
     super.initState();
     _tempoSelecionado = _opcoesTempo[1];
-    _pontosParaVencer = _opcoesPontos[1];
-    final temas = _opcoesTemasPorJogo();
-    _temaSelecionado = temas.first;
+    _limiteRodadas = _opcoesRodadas[1];
+    _carregarTemasDoBanco();
   }
 
   Widget _buildGameIcon() {
@@ -102,33 +180,33 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
       case 'Mímica':
         return SvgPicture.asset(
           'assets/icons/mask.svg',
-          width: 33,
-          height: 33,
-          colorFilter: const ColorFilter.mode(azulCobalto, BlendMode.srcIn),
+          width: 24,
+          height: 24,
+          colorFilter: const ColorFilter.mode(brancoPuro, BlendMode.srcIn),
         );
       case 'Quem Sou Eu?':
         return SvgPicture.asset(
           'assets/icons/face.svg',
-          width: 33,
-          height: 33,
-          colorFilter: const ColorFilter.mode(azulCobalto, BlendMode.srcIn),
+          width: 24,
+          height: 24,
+          colorFilter: const ColorFilter.mode(brancoPuro, BlendMode.srcIn),
         );
       case 'O Impostor':
         return SvgPicture.asset(
           'assets/icons/spy.svg',
-          width: 33,
-          height: 33,
-          colorFilter: const ColorFilter.mode(azulCobalto, BlendMode.srcIn),
+          width: 24,
+          height: 24,
+          colorFilter: const ColorFilter.mode(brancoPuro, BlendMode.srcIn),
         );
       case 'Bomba Relógio':
         return SvgPicture.asset(
           'assets/icons/bomb.svg',
-          width: 33,
-          height: 33,
-          colorFilter: const ColorFilter.mode(azulCobalto, BlendMode.srcIn),
+          width: 24,
+          height: 24,
+          colorFilter: const ColorFilter.mode(brancoPuro, BlendMode.srcIn),
         );
       default:
-        return const Icon(Icons.sports_esports, color: azulCobalto, size: 33);
+        return const Icon(Icons.sports_esports, color: brancoPuro, size: 24);
     }
   }
 
@@ -136,7 +214,8 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
     switch (widget.gameTitle) {
       case 'Mímica':
         return '• Quem estiver com o celular faz gestos sem falar nada.\n'
-            '• A galera tenta adivinhar antes do tempo acabar.';
+            '• Se acertarem a palavra, quem fez a mímica ganha +1 ponto.\n'
+            '• A partida encerra ao atingir o limite de rodadas.';
       case 'Quem Sou Eu?':
         return '• O jogador adivinha quem ou o que é com base nas dicas da roda.\n'
             '• Responda apenas sim, não ou às vezes quando perguntado.';
@@ -221,11 +300,13 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
 
   void _iniciarJogo() {
     if (!_podeIniciar) {
+      final msg = _temasBanco.isEmpty
+          ? 'Aguarde ou verifique os temas cadastrados no banco para ${widget.gameTitle}.'
+          : 'Adicione pelo menos $_minimoJogadores participantes para ${widget.gameTitle}.';
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            'Adicione pelo menos $_minimoJogadores participantes para ${widget.gameTitle}.',
-          ),
+          content: Text(msg),
           backgroundColor: azulMarinho,
         ),
       );
@@ -234,6 +315,18 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
 
     switch (widget.gameTitle) {
       case 'Mímica':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MimicaGameScreen(
+              participantes: List.from(_participantes),
+              tempoSelecionado: _tempoSelecionado,
+              tema: _temaNomeSelecionado,
+              temaId: _temaIdSelecionado,
+              limiteRodadas: _limiteRodadas,
+            ),
+          ),
+        );
         break;
       case 'Quem Sou Eu?':
         break;
@@ -252,14 +345,29 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final temasDisponiveis = _opcoesTemasPorJogo();
-    final valorTemaAtual = temasDisponiveis.contains(_temaSelecionado)
-        ? _temaSelecionado
-        : temasDisponiveis.first;
-
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-      appBar: PlayzzoAppBar(titulo: widget.gameTitle, icone: _buildGameIcon()),
+      appBar: AppBar(
+        backgroundColor: azulCobalto,
+        elevation: 0,
+        centerTitle: true,
+        iconTheme: const IconThemeData(color: brancoPuro),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildGameIcon(),
+            const SizedBox(width: 8),
+            Text(
+              widget.gameTitle,
+              style: const TextStyle(
+                color: brancoPuro,
+                fontWeight: FontWeight.w900,
+                fontSize: 20,
+              ),
+            ),
+          ],
+        ),
+      ),
       body: Column(
         children: [
           Expanded(
@@ -372,7 +480,7 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
                   ),
                   const SizedBox(height: 16),
                 ],
-                if (_usaPontosVitoria) ...[
+                if (_usaLimiteRodadas) ...[
                   Container(
                     padding: const EdgeInsets.all(18.0),
                     decoration: BoxDecoration(
@@ -390,7 +498,7 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          'Pontos para Vencer',
+                          'Limite de Rodadas',
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w800,
@@ -399,7 +507,7 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
                         ),
                         const SizedBox(height: 12),
                         DropdownButtonFormField<int>(
-                          value: _pontosParaVencer,
+                          value: _limiteRodadas,
                           dropdownColor: brancoPuro,
                           borderRadius: BorderRadius.circular(16),
                           decoration: InputDecoration(
@@ -419,16 +527,16 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
                             fontWeight: FontWeight.w700,
                             color: azulMarinho,
                           ),
-                          items: _opcoesPontos.map((pontos) {
+                          items: _opcoesRodadas.map((rodadas) {
                             return DropdownMenuItem<int>(
-                              value: pontos,
-                              child: Text('$pontos pontos'),
+                              value: rodadas,
+                              child: Text('$rodadas rodadas'),
                             );
                           }).toList(),
-                          onChanged: (novosPontos) {
-                            if (novosPontos != null) {
+                          onChanged: (novasRodadas) {
+                            if (novasRodadas != null) {
                               setState(() {
-                                _pontosParaVencer = novosPontos;
+                                _limiteRodadas = novasRodadas;
                               });
                             }
                           },
@@ -463,41 +571,80 @@ class _GameConfigScreenState extends State<GameConfigScreen> {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      DropdownButtonFormField<String>(
-                        value: valorTemaAtual,
-                        dropdownColor: brancoPuro,
-                        borderRadius: BorderRadius.circular(16),
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: const Color(0xFFF5F7FA),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 12,
+                      if (_carregandoTemas)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8),
+                          child: LinearProgressIndicator(color: azulCobalto),
+                        )
+                      else if (_temasBanco.isEmpty)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _erroTemas ??
+                                  'Nenhum tema disponível no banco.',
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: rosaVibrante,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            TextButton.icon(
+                              onPressed: _carregarTemasDoBanco,
+                              icon: const Icon(Icons.refresh_rounded, size: 16),
+                              label: const Text('Recarregar temas'),
+                            ),
+                          ],
+                        )
+                      else
+                        DropdownButtonFormField<int>(
+                          value: _temaIdSelecionado,
+                          dropdownColor: brancoPuro,
+                          borderRadius: BorderRadius.circular(16),
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: const Color(0xFFF5F7FA),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 12,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: BorderSide.none,
+                            ),
                           ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(14),
-                            borderSide: BorderSide.none,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: azulMarinho,
                           ),
-                        ),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: azulMarinho,
-                        ),
-                        items: temasDisponiveis.map((tema) {
-                          return DropdownMenuItem<String>(
-                            value: tema,
-                            child: Text(tema),
-                          );
-                        }).toList(),
-                        onChanged: (novoTema) {
-                          if (novoTema != null) {
+                          items: _temasBanco.map((rawItem) {
+                            final tema = rawItem as Map;
+                            final id = _converterParaInt(tema['id']) ?? 0;
+                            final nome = tema['nome_tema'].toString();
+                            return DropdownMenuItem<int>(
+                              value: id,
+                              child: Text(nome),
+                            );
+                          }).toList(),
+                          onChanged: (novoId) {
+                            if (novoId == null) return;
+                            final rawEscolhido = _temasBanco.firstWhere(
+                              (rawT) =>
+                                  _converterParaInt((rawT as Map)['id']) ==
+                                  novoId,
+                              orElse: () => _temasBanco.first,
+                            );
+                            final escolhido = rawEscolhido as Map;
                             setState(() {
-                              _temaSelecionado = novoTema;
+                              _temaIdSelecionado =
+                                  _converterParaInt(escolhido['id']);
+                              _temaNomeSelecionado =
+                                  escolhido['nome_tema'].toString();
                             });
-                          }
-                        },
-                      ),
+                          },
+                        ),
                     ],
                   ),
                 ),
